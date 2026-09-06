@@ -1,0 +1,16 @@
+﻿namespace ClothingAPI.DTOs.Reviews;
+
+public class AdminReviewDto
+{
+    public int ReviewId { get; set; }
+    public int ProductId { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public int UserId { get; set; }
+    public string UserFullName { get; set; } = string.Empty;
+    public string UserEmail { get; set; } = string.Empty;
+    public int? OrderItemId { get; set; }
+    public byte Rating { get; set; }
+    public string? Comment { get; set; }
+    public bool IsApproved { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
