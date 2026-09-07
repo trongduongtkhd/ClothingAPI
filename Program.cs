@@ -138,6 +138,7 @@ namespace ClothingAPI
             });
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseCors("AngularApp");
             app.UseAuthentication();
             app.UseAuthorization();

@@ -154,6 +154,47 @@ public class ReviewService : IReviewService
         await _context.SaveChangesAsync();
     }
 
+
+    public async Task<PagedResult<MyReviewDto>> GetMyReviewsAsync(int userId, MyReviewQueryDto query)
+
+    {
+        var page = query.Page < 1 ? 1 : query.Page;
+        var pageSize = query.PageSize < 1 ? 10 : Math.Min(query.PageSize, 100);
+
+        var reviews = _context.Reviews
+            .AsNoTracking()
+            .Include(x => x.Product)
+            .Where(x => x.UserId == userId);
+
+        var totalItems = await reviews.CountAsync();
+
+        var reviewList = await reviews
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<MyReviewDto>
+        {
+            Items = reviewList.Select(x => new MyReviewDto
+            {
+                ReviewId = x.ReviewId,
+                ProductId = x.ProductId,
+                ProductName = x.Product.ProductName,
+                OrderItemId = x.OrderItemId,
+                Rating = x.Rating,
+                Comment = x.Comment,
+                IsApproved = x.IsApproved,
+                CreatedAt = x.CreatedAt
+            }).ToList(),
+
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+            TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
+        };
+    }
+
     public async Task<PagedResult<AdminReviewDto>> GetAllForAdminAsync(AdminReviewQueryDto query)
 
     {

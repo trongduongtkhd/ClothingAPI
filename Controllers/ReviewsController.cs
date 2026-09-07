@@ -18,6 +18,21 @@ public class ReviewsController : ControllerBase
         _reviewService = reviewService;
     }
 
+    [HttpGet("my")]
+    public async Task<ActionResult<ApiResponse<PagedResult<MyReviewDto>>>> GetMyReviews(
+    [FromQuery] MyReviewQueryDto query)
+    {
+        var userId = User.GetUserId();
+
+        var result = await _reviewService.GetMyReviewsAsync(userId, query);
+
+        return Ok(new ApiResponse<PagedResult<MyReviewDto>>(
+            true,
+            "Lấy danh sách đánh giá của tôi thành công.",
+            result
+        ));
+    }
+
     [HttpPost]
     public async Task<ActionResult<ApiResponse<AdminReviewDto>>> Create([FromBody] CreateReviewDto dto)
     {

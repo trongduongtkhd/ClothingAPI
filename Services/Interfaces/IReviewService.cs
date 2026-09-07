@@ -11,7 +11,9 @@ namespace ClothingAPI.Services.Interfaces
         Task DeleteAsync(int userId, int reviewId);
         Task<PagedResult<AdminReviewDto>> GetAllForAdminAsync(AdminReviewQueryDto query);
         Task SetApprovalAsync(int reviewId, bool isApproved);
-       
+
+        Task<PagedResult<MyReviewDto>> GetMyReviewsAsync(int userId, MyReviewQueryDto query);
+
 
     }
 }
