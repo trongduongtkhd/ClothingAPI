@@ -13,5 +13,7 @@ namespace ClothingAPI.Services.Interfaces
         Task<CouponValidationDto> ValidateForCartAsync(int userId, ValidateCouponDto dto);
         Task<PagedResult<CouponUsageDto>> GetUsagesAsync(int couponId, int page, int pageSize);
 
+        Task<List<AvailableCouponDto>> GetAvailableForUserAsync(int userId);
+
     }
 }

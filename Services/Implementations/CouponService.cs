@@ -467,4 +467,140 @@ public class CouponService : ICouponService
             TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
         };
     }
+
+    public async Task<List<AvailableCouponDto>> GetAvailableForUserAsync(int userId)
+    {
+        var now = DateTime.UtcNow;
+
+        // Không trả coupon bị Admin tắt hoặc đã hết hạn.
+        var coupons = await _context.Coupons
+            .AsNoTracking()
+            .Include(x => x.CouponCategories)
+            .Include(x => x.CouponProducts)
+            .Where(x => x.IsActive && x.EndDate >= now)
+            .OrderBy(x => x.EndDate)
+            .ToListAsync();
+
+        var cartItems = await _context.CartItems
+            .AsNoTracking()
+            .Include(x => x.Variant)
+                .ThenInclude(x => x.Product)
+            .Where(x => x.UserId == userId)
+            .ToListAsync();
+
+        var subtotal = cartItems.Sum(x =>
+        {
+            var unitPrice = x.Variant.SalePrice ?? x.Variant.Price;
+            return unitPrice * x.Quantity;
+        });
+
+        // Lấy số lần Customer đã dùng từng coupon chỉ bằng một query.
+        var userUsageCounts = await _context.CouponUsages
+            .AsNoTracking()
+            .Where(x => x.UserId == userId)
+            .GroupBy(x => x.CouponId)
+            .Select(x => new
+            {
+                CouponId = x.Key,
+                UsedCount = x.Count()
+            })
+            .ToDictionaryAsync(x => x.CouponId, x => x.UsedCount);
+
+        var results = new List<AvailableCouponDto>();
+
+        foreach (var coupon in coupons)
+        {
+            var userUsedCount = userUsageCounts.TryGetValue(coupon.CouponId, out var count) ? count : 0;
+
+            var categoryIds = coupon.CouponCategories.Select(x => x.CategoryId).ToHashSet();
+
+            var productIds = coupon.CouponProducts.Select(x => x.ProductId).ToHashSet();
+
+            var hasTargetRestriction = categoryIds.Count > 0 || productIds.Count > 0;
+
+
+            decimal eligibleSubtotal = 0;
+
+            foreach (var cartItem in cartItems)
+            {
+                var unitPrice = cartItem.Variant.SalePrice ?? cartItem.Variant.Price;
+
+                var itemTotal = unitPrice * cartItem.Quantity;
+
+                var isEligible = !hasTargetRestriction || productIds.Contains(cartItem.Variant.ProductId) || categoryIds.Contains(cartItem.Variant.Product.CategoryId);
+
+                if (isEligible)
+                {
+                    eligibleSubtotal += itemTotal;
+                }
+            }
+
+            var isUsable = true;
+            string? unavailableReason = null;
+
+            if (now < coupon.StartDate)
+            {
+                isUsable = false;
+                unavailableReason = "Mã giảm giá chưa đến thời gian sử dụng.";
+            }
+            else if (cartItems.Count == 0)
+            {
+                isUsable = false;
+                unavailableReason = "Giỏ hàng đang trống.";
+            }
+            else if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
+
+            {
+                isUsable = false;
+                unavailableReason = "Mã giảm giá đã hết lượt sử dụng.";
+            }
+            else if (coupon.UsageLimitPerUser.HasValue && userUsedCount >= coupon.UsageLimitPerUser.Value)
+
+            {
+                isUsable = false;
+                unavailableReason = "Bạn đã dùng hết số lượt cho phép của mã này.";
+
+            }
+            else if (eligibleSubtotal <= 0)
+            {
+                isUsable = false;
+                unavailableReason = "Mã không áp dụng cho sản phẩm trong giỏ hàng.";
+
+            }
+            else if (eligibleSubtotal < coupon.MinOrderAmount)
+            {
+                isUsable = false;
+                unavailableReason = $"Cần mua thêm {(coupon.MinOrderAmount - eligibleSubtotal):N0}đ " + "để sử dụng mã này.";
+            }
+
+            results.Add(new AvailableCouponDto
+            {
+                CouponId = coupon.CouponId,
+                Code = coupon.Code,
+                Name = coupon.Name,
+                Description = coupon.Description,
+
+                DiscountType = coupon.DiscountType,
+                DiscountValue = coupon.DiscountValue,
+                MaxDiscountAmount = coupon.MaxDiscountAmount,
+                MinOrderAmount = coupon.MinOrderAmount,
+
+                StartDate = coupon.StartDate,
+                EndDate = coupon.EndDate,
+
+                UsageLimit = coupon.UsageLimit,
+                UsageLimitPerUser = coupon.UsageLimitPerUser,
+                UsedCount = coupon.UsedCount,
+                UserUsedCount = userUsedCount,
+
+                EligibleSubtotal = eligibleSubtotal,
+                DiscountAmount = isUsable ? CalculateDiscount(coupon, eligibleSubtotal) : 0,
+
+                IsUsable = isUsable,
+                UnavailableReason = unavailableReason
+            });
+        }
+
+        return results;
+    }
 }

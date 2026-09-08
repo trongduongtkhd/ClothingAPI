@@ -18,6 +18,20 @@ public class CouponsController : ControllerBase
         _couponService = couponService;
     }
 
+    [HttpGet("available")]
+    public async Task<ActionResult<ApiResponse<List<AvailableCouponDto>>>> GetAvailableCoupons()
+    {
+        var userId = User.GetUserId();
+
+        var result = await _couponService.GetAvailableForUserAsync(userId);
+
+        return Ok(new ApiResponse<List<AvailableCouponDto>>(
+            true,
+            "Lấy danh sách ưu đãi thành công.",
+            result
+        ));
+    }
+
     [HttpPost("validate")]
     public async Task<ActionResult<ApiResponse<CouponValidationDto>>>
         Validate([FromBody] ValidateCouponDto dto)
