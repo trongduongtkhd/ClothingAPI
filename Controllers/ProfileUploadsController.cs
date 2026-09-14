@@ -1,5 +1,6 @@
 ﻿using ClothingAPI.DTOs.Uploads;
 using ClothingAPI.Helpers;
+using ClothingAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -58,11 +59,11 @@ public class ProfileUploadsController : ControllerBase
                 "Chỉ hỗ trợ file JPG, JPEG, PNG hoặc WEBP."
             ));
         }
-
+        const string folder = "avatars";
         var webRootPath = _environment.WebRootPath ?? Path.Combine(_environment.ContentRootPath, "wwwroot");
 
 
-        var uploadFolder = Path.Combine(webRootPath, "uploads", "avatars");
+        var uploadFolder = Path.Combine(webRootPath, "uploads", folder);
 
         Directory.CreateDirectory(uploadFolder);
 
@@ -72,7 +73,7 @@ public class ProfileUploadsController : ControllerBase
         await using var stream = new FileStream(filePath, FileMode.Create);
         await file.CopyToAsync(stream);
 
-        var imageUrl = $"{Request.Scheme}://{Request.Host}/uploads/avatars/{fileName}";
+        var imageUrl = $"/uploads/{folder}/{fileName}";
 
         return Ok(new ApiResponse<UploadImageDto>(
             true,

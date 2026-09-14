@@ -96,8 +96,8 @@ public class UploadsController : ControllerBase
         await using var stream = new FileStream(filePath, FileMode.Create);
         await file.CopyToAsync(stream);
 
-        var imageUrl =
-            $"{Request.Scheme}://{Request.Host}/uploads/{folder}/{fileName}";
+        var imageUrl = $"/uploads/{folder}/{fileName}";
+
 
         return Ok(new ApiResponse<UploadImageDto>(
             true,
