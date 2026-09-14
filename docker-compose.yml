@@ -1,0 +1,76 @@
+name: clothing-store
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: clothing-db
+    restart: unless-stopped
+
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+
+    ports:
+      - "14333:1433"
+
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: clothing-api
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ClothingStoreDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=True"
+      JwtSettings__SecretKey: ${JWT_SECRET_KEY}
+      JwtSettings__Issuer: ${JWT_ISSUER}
+      JwtSettings__Audience: ${JWT_AUDIENCE}
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - uploads_data:/app/wwwroot/uploads
+      - dataprotection_data:/root/.aspnet/DataProtection-Keys
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../../Angular/ShopQuanAo/shop-clothing-ui
+      dockerfile: Dockerfile
+
+    container_name: clothing-frontend
+    restart: unless-stopped
+
+    ports:
+      - "4200:80"
+
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  sqlserver_data:
+  uploads_data:
+  dataprotection_data:

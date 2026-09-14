@@ -13,7 +13,6 @@ namespace ClothingAPI.Controllers
     public class AdminCategoriesController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
-
         public AdminCategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;

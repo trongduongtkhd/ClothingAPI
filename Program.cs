@@ -122,6 +122,12 @@ namespace ClothingAPI
             });
 
             var app = builder.Build();
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                dbContext.Database.Migrate();
+            }
             app.UseMiddleware<ExceptionMiddleware>();
 
             // Configure the HTTP request pipeline.
@@ -137,7 +143,11 @@ namespace ClothingAPI
                 options.RoutePrefix = "swagger";
             });
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
+            if (!app.Environment.IsEnvironment("Docker"))
+            {
+                app.UseHttpsRedirection();
+            }
             app.UseStaticFiles();
             app.UseCors("AngularApp");
             app.UseAuthentication();
