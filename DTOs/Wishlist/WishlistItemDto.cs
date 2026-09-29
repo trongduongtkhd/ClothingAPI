@@ -1,6 +1,6 @@
-﻿namespace ClothingAPI.DTOs.Storefront
+namespace ClothingAPI.DTOs.Wishlist
 {
-    public class PublicProductListDto
+    public class WishlistItemDto
     {
         public int ProductId { get; set; }
 
@@ -12,8 +12,6 @@
 
         public string? BrandName { get; set; }
 
-        public string? BrandLogoUrl { get; set; }
-
         public decimal BasePrice { get; set; }
 
         public decimal? SalePrice { get; set; }
@@ -21,5 +19,7 @@
         public string? ThumbnailUrl { get; set; }
 
         public bool IsFeatured { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

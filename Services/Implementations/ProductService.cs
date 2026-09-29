@@ -64,6 +64,9 @@ public class ProductService : IProductService
                 TotalStockQuantity = x.ProductVariants
                     .Where(variant => variant.IsActive)
                     .Sum(variant => (int?)variant.StockQuantity) ?? 0,
+                AverageCostPrice = x.ProductVariants
+                    .Where(variant => variant.IsActive && variant.AverageCostPrice != null)
+                    .Average(variant => variant.AverageCostPrice),
                 IsFeatured = x.IsFeatured,
                 IsActive = x.IsActive,
                 CreatedAt = x.CreatedAt
@@ -121,6 +124,7 @@ public class ProductService : IProductService
         ValidatePrice(dto.BasePrice, dto.SalePrice);
 
         var product = await _context.Products
+            .Include(x => x.ProductVariants)
             .FirstOrDefaultAsync(x => x.ProductId == productId);
 
         if (product is null)
@@ -129,6 +133,21 @@ public class ProductService : IProductService
         }
 
         await ValidateCategoryAndBrandAsync(dto.CategoryId, dto.BrandId);
+
+        // Không cho mở bán sản phẩm chưa có hàng trong kho.
+        if (dto.IsActive && !product.IsActive)
+        {
+            var totalStock = product.ProductVariants
+                .Where(x => x.IsActive)
+                .Sum(x => x.StockQuantity);
+
+            if (totalStock <= 0)
+            {
+                throw new BadRequestException(
+                    "Không thể mở bán sản phẩm khi tồn kho đang bằng 0. Vui lòng tạo phiếu nhập kho trước."
+                );
+            }
+        }
 
         product.CategoryId = dto.CategoryId;
         product.BrandId = dto.BrandId;
@@ -209,7 +228,8 @@ public class ProductService : IProductService
             SKU = sku,
             Price = dto.Price,
             SalePrice = dto.SalePrice,
-            StockQuantity = dto.StockQuantity,
+            // Tồn kho chỉ tăng qua phiếu nhập kho, biến thể mới luôn bắt đầu từ 0.
+            StockQuantity = 0,
             ImageUrl = NormalizeNullableText(dto.ImageUrl),
             IsActive = dto.IsActive
         };
@@ -260,7 +280,7 @@ public class ProductService : IProductService
         variant.SKU = sku;
         variant.Price = dto.Price;
         variant.SalePrice = dto.SalePrice;
-        variant.StockQuantity = dto.StockQuantity;
+        // Bỏ qua StockQuantity từ form: tồn kho chỉ thay đổi qua phiếu nhập kho hoặc khi bán hàng.
         variant.ImageUrl = NormalizeNullableText(dto.ImageUrl);
         variant.IsActive = dto.IsActive;
 
@@ -543,6 +563,7 @@ public class ProductService : IProductService
             Price = variant.Price,
             SalePrice = variant.SalePrice,
             StockQuantity = variant.StockQuantity,
+            AverageCostPrice = variant.AverageCostPrice,
             ImageUrl = variant.ImageUrl,
             IsActive = variant.IsActive
         };

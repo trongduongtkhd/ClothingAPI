@@ -4,6 +4,14 @@ public class DashboardDto
 {
     public decimal TotalRevenue { get; set; }
 
+    // Giá vốn hàng bán của các đơn đã hoàn thành.
+    public decimal TotalCostOfGoodsSold { get; set; }
+
+    public decimal TotalProfit { get; set; }
+
+    // Tỷ suất lợi nhuận trên doanh thu (%).
+    public decimal ProfitMarginPercent { get; set; }
+
     public int TotalOrders { get; set; }
 
     public int TotalCustomers { get; set; }

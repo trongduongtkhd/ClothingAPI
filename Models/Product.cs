@@ -24,7 +24,7 @@ namespace ClothingAPI.Models
         public ICollection<ProductVariant> ProductVariants { get; set; } = new List<ProductVariant>();
         public ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
-
+        public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
 
     }
 }

@@ -46,6 +46,28 @@ namespace ClothingAPI.Controllers
             ));
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult<ApiResponse<object>>> ForgotPassword([FromBody] ForgotPasswordDto forgotPasswordDto)
+        {
+            await _authService.ForgotPasswordAsync(forgotPasswordDto);
+
+            return Ok(new ApiResponse<object>(
+                true,
+                "Nếu email tồn tại trong hệ thống, chúng tôi đã gửi hướng dẫn đặt lại mật khẩu."
+            ));
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<ActionResult<ApiResponse<object>>> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            await _authService.ResetPasswordAsync(resetPasswordDto);
+
+            return Ok(new ApiResponse<object>(
+                true,
+                "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại."
+            ));
+        }
+
         [Authorize]
         [HttpGet("me")]
         public async Task<ActionResult<ApiResponse<CurrentUserDto>>> GetCurrentUser()

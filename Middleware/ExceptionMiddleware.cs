@@ -7,6 +7,13 @@ namespace ClothingAPI.Middleware
 {
     public class ExceptionMiddleware
     {
+        // Phải khớp camelCase với JSON mà controller trả về (mặc định của ASP.NET Core),
+        // nếu không frontend (đang đọc "message" chữ thường) sẽ không thấy nội dung lỗi thật.
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
+
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
 
@@ -49,7 +56,7 @@ namespace ClothingAPI.Middleware
                 );
 
                 await context.Response.WriteAsync(
-                    JsonSerializer.Serialize(response)
+                    JsonSerializer.Serialize(response, JsonOptions)
                 );
             }
         }

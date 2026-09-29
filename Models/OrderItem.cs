@@ -11,6 +11,8 @@ public class OrderItem
     public string ColorName { get; set; } = string.Empty;
     public string SizeName { get; set; } = string.Empty;
     public decimal UnitPrice { get; set; }
+    // Giá vốn tại thời điểm bán, dùng để tính lợi nhuận.
+    public decimal UnitCost { get; set; }
     public int Quantity { get; set; }
     public decimal TotalPrice { get; set; }
     public Order Order { get; set; } = null!;

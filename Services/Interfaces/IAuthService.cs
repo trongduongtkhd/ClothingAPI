@@ -7,5 +7,7 @@ namespace ClothingAPI.Services.Interfaces
         Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto);
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<CurrentUserDto> GetCurrentUserAsync(int userId);
+        Task ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
+        Task ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 }

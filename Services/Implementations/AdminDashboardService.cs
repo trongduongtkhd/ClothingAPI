@@ -48,6 +48,22 @@ public class AdminDashboardService : IAdminDashboardService
 
         var totalRevenue = await completedOrders.SumAsync(x => (decimal?)x.TotalAmount) ?? 0m;
 
+        // Giá vốn hàng bán: ưu tiên giá vốn đã chốt lúc bán, nếu chưa có thì lấy giá vốn hiện tại của biến thể.
+        var completedOrderItems = _context.OrderItems
+            .AsNoTracking()
+            .Where(x => completedOrders.Any(order => order.OrderId == x.OrderId));
+
+        var totalCostOfGoodsSold = await completedOrderItems
+            .SumAsync(x => (decimal?)(
+                (x.UnitCost > 0 ? x.UnitCost : (x.Variant.AverageCostPrice ?? 0m)) * x.Quantity
+            )) ?? 0m;
+
+        var totalProfit = totalRevenue - totalCostOfGoodsSold;
+
+        var profitMarginPercent = totalRevenue > 0
+            ? Math.Round(totalProfit / totalRevenue * 100, 1)
+            : 0m;
+
         var totalOrders = await orders.CountAsync();
 
         var pendingOrders = await orders.CountAsync(x => x.OrderStatus == OrderStatus.Pending);
@@ -100,6 +116,9 @@ public class AdminDashboardService : IAdminDashboardService
         return new DashboardDto
         {
             TotalRevenue = totalRevenue,
+            TotalCostOfGoodsSold = totalCostOfGoodsSold,
+            TotalProfit = totalProfit,
+            ProfitMarginPercent = profitMarginPercent,
             TotalOrders = totalOrders,
             TotalCustomers = totalCustomers,
             PendingOrders = pendingOrders,

@@ -16,6 +16,15 @@
 
         public bool IsActive { get; set; } = true;
 
+        public string? ResetPasswordToken { get; set; }
+
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
+
+        // Chống brute-force: đếm số lần đăng nhập sai liên tiếp, khoá tạm khi vượt ngưỡng.
+        public int FailedLoginAttempts { get; set; }
+
+        public DateTime? LockoutEndUtc { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
@@ -27,6 +36,8 @@
         public ICollection<OrderStatusHistory> ChangedOrderStatusHistories { get; set; } = new List<OrderStatusHistory>();
         public ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
+        public ICollection<PurchaseOrder> CreatedPurchaseOrders { get; set; } = new List<PurchaseOrder>();
 
     }
 }

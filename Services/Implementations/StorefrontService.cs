@@ -299,6 +299,7 @@ public class StorefrontService : IStorefrontService
             Slug = product.Slug,
             CategoryName = product.Category.CategoryName,
             BrandName = product.Brand?.BrandName,
+            BrandLogoUrl = product.Brand?.LogoUrl,
             BasePrice = product.BasePrice,
             SalePrice = product.SalePrice,
             ThumbnailUrl = thumbnail,

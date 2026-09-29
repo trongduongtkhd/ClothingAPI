@@ -40,6 +40,10 @@ namespace ClothingAPI.Data
 
         public DbSet<CouponUsage> CouponUsages { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
+        public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -71,6 +75,11 @@ namespace ClothingAPI.Data
             ConfigureCouponUsage(modelBuilder);
 
             ConfigureReview(modelBuilder);
+            ConfigureWishlistItem(modelBuilder);
+
+            ConfigureSupplier(modelBuilder);
+            ConfigurePurchaseOrder(modelBuilder);
+            ConfigurePurchaseOrderItem(modelBuilder);
 
             SeedRoles(modelBuilder);
         }
@@ -350,6 +359,9 @@ namespace ClothingAPI.Data
                 entity.Property(x => x.StockQuantity)
                     .IsRequired();
 
+                entity.Property(x => x.AverageCostPrice)
+                    .HasPrecision(18, 2);
+
                 entity.Property(x => x.ImageUrl)
                     .HasMaxLength(500);
 
@@ -470,6 +482,160 @@ namespace ClothingAPI.Data
 
                 entity.HasOne(x => x.Variant)
                     .WithMany(x => x.CartItems)
+                    .HasForeignKey(x => x.VariantId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+        }
+
+        private static void ConfigureWishlistItem(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<WishlistItem>(entity =>
+            {
+                entity.ToTable("WishlistItems");
+
+                entity.HasKey(x => x.WishlistItemId);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                // Một User chỉ yêu thích một Product một lần.
+                entity.HasIndex(x => new { x.UserId, x.ProductId })
+                    .IsUnique();
+
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.WishlistItems)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Product)
+                    .WithMany(x => x.WishlistItems)
+                    .HasForeignKey(x => x.ProductId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        private static void ConfigureSupplier(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Supplier>(entity =>
+            {
+                entity.ToTable("Suppliers");
+
+                entity.HasKey(x => x.SupplierId);
+
+                entity.Property(x => x.SupplierName)
+                    .HasMaxLength(150)
+                    .IsRequired();
+
+                entity.HasIndex(x => x.SupplierName)
+                    .IsUnique();
+
+                entity.Property(x => x.ContactName)
+                    .HasMaxLength(150);
+
+                entity.Property(x => x.Phone)
+                    .HasMaxLength(20);
+
+                entity.Property(x => x.Email)
+                    .HasMaxLength(150);
+
+                entity.Property(x => x.Address)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.TaxCode)
+                    .HasMaxLength(50);
+
+                entity.Property(x => x.Description)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.IsActive)
+                    .HasDefaultValue(true);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+            });
+        }
+
+        private static void ConfigurePurchaseOrder(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PurchaseOrder>(entity =>
+            {
+                entity.ToTable("PurchaseOrders");
+
+                entity.HasKey(x => x.PurchaseOrderId);
+
+                entity.Property(x => x.PurchaseOrderCode)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.HasIndex(x => x.PurchaseOrderCode)
+                    .IsUnique();
+
+                entity.Property(x => x.Note)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.TotalAmount)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(x => x.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue(PurchaseOrderStatuses.Completed)
+                    .IsRequired();
+
+                entity.Property(x => x.CancelReason)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasOne(x => x.Supplier)
+                    .WithMany(x => x.PurchaseOrders)
+                    .HasForeignKey(x => x.SupplierId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.CreatedByUser)
+                    .WithMany(x => x.CreatedPurchaseOrders)
+                    .HasForeignKey(x => x.CreatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+        }
+
+        private static void ConfigurePurchaseOrderItem(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<PurchaseOrderItem>(entity =>
+            {
+                entity.ToTable("PurchaseOrderItems");
+
+                entity.HasKey(x => x.PurchaseOrderItemId);
+
+                entity.Property(x => x.ProductName)
+                    .HasMaxLength(200)
+                    .IsRequired();
+
+                entity.Property(x => x.SKU)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                entity.Property(x => x.ColorName)
+                    .HasMaxLength(100)
+                    .IsRequired();
+
+                entity.Property(x => x.SizeName)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.Property(x => x.UnitCost)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.Property(x => x.LineTotal)
+                    .HasColumnType("decimal(18,2)");
+
+                entity.HasOne(x => x.PurchaseOrder)
+                    .WithMany(x => x.Items)
+                    .HasForeignKey(x => x.PurchaseOrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.Variant)
+                    .WithMany(x => x.PurchaseOrderItems)
                     .HasForeignKey(x => x.VariantId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
@@ -664,6 +830,9 @@ namespace ClothingAPI.Data
                     .IsRequired();
 
                 entity.Property(x => x.UnitPrice)
+                    .HasPrecision(18, 2);
+
+                entity.Property(x => x.UnitCost)
                     .HasPrecision(18, 2);
 
                 entity.Property(x => x.TotalPrice)

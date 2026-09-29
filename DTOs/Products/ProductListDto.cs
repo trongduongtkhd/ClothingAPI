@@ -13,6 +13,9 @@
 
         public int TotalStockQuantity { get; set; }
 
+        // Giá vốn bình quân của các biến thể (trọng số theo tồn kho).
+        public decimal? AverageCostPrice { get; set; }
+
         public bool IsFeatured { get; set; }
 
         public bool IsActive { get; set; }

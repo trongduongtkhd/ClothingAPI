@@ -50,6 +50,7 @@ services:
     volumes:
       - uploads_data:/app/wwwroot/uploads
       - dataprotection_data:/root/.aspnet/DataProtection-Keys
+      - ./Logs:/app/Logs
 
     depends_on:
       db:

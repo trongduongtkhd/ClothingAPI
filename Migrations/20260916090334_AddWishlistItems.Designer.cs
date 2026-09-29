@@ -4,6 +4,7 @@ using ClothingAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClothingAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260916090334_AddWishlistItems")]
+    partial class AddWishlistItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -506,10 +509,6 @@ namespace ClothingAPI.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("UnitCost")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
@@ -725,10 +724,6 @@ namespace ClothingAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VariantId"));
 
-                    b.Property<decimal?>("AverageCostPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ColorId")
                         .HasColumnType("int");
 
@@ -776,118 +771,6 @@ namespace ClothingAPI.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductVariants", (string)null);
-                });
-
-            modelBuilder.Entity("ClothingAPI.Models.PurchaseOrder", b =>
-                {
-                    b.Property<int>("PurchaseOrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseOrderId"));
-
-                    b.Property<string>("CancelReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int>("CreatedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Note")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("PurchaseOrderCode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Completed");
-
-                    b.Property<int>("SupplierId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("PurchaseOrderId");
-
-                    b.HasIndex("CreatedByUserId");
-
-                    b.HasIndex("PurchaseOrderCode")
-                        .IsUnique();
-
-                    b.HasIndex("SupplierId");
-
-                    b.ToTable("PurchaseOrders", (string)null);
-                });
-
-            modelBuilder.Entity("ClothingAPI.Models.PurchaseOrderItem", b =>
-                {
-                    b.Property<int>("PurchaseOrderItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PurchaseOrderItemId"));
-
-                    b.Property<string>("ColorName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal>("LineTotal")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("ProductName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("PurchaseOrderId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SKU")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SizeName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("VariantId")
-                        .HasColumnType("int");
-
-                    b.HasKey("PurchaseOrderItemId");
-
-                    b.HasIndex("PurchaseOrderId");
-
-                    b.HasIndex("VariantId");
-
-                    b.ToTable("PurchaseOrderItems", (string)null);
                 });
 
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
@@ -1000,61 +883,6 @@ namespace ClothingAPI.Migrations
                     b.ToTable("Sizes", (string)null);
                 });
 
-            modelBuilder.Entity("ClothingAPI.Models.Supplier", b =>
-                {
-                    b.Property<int>("SupplierId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SupplierId"));
-
-                    b.Property<string>("Address")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ContactName")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Email")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("SupplierName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("TaxCode")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("SupplierId");
-
-                    b.HasIndex("SupplierName")
-                        .IsUnique();
-
-                    b.ToTable("Suppliers", (string)null);
-                });
-
             modelBuilder.Entity("ClothingAPI.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -1077,9 +905,6 @@ namespace ClothingAPI.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("FailedLoginAttempts")
-                        .HasColumnType("int");
-
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -1089,9 +914,6 @@ namespace ClothingAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
-
-                    b.Property<DateTime?>("LockoutEndUtc")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -1400,44 +1222,6 @@ namespace ClothingAPI.Migrations
                     b.Navigation("Size");
                 });
 
-            modelBuilder.Entity("ClothingAPI.Models.PurchaseOrder", b =>
-                {
-                    b.HasOne("ClothingAPI.Models.User", "CreatedByUser")
-                        .WithMany("CreatedPurchaseOrders")
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("ClothingAPI.Models.Supplier", "Supplier")
-                        .WithMany("PurchaseOrders")
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CreatedByUser");
-
-                    b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("ClothingAPI.Models.PurchaseOrderItem", b =>
-                {
-                    b.HasOne("ClothingAPI.Models.PurchaseOrder", "PurchaseOrder")
-                        .WithMany("Items")
-                        .HasForeignKey("PurchaseOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ClothingAPI.Models.ProductVariant", "Variant")
-                        .WithMany("PurchaseOrderItems")
-                        .HasForeignKey("VariantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PurchaseOrder");
-
-                    b.Navigation("Variant");
-                });
-
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
                 {
                     b.HasOne("ClothingAPI.Models.OrderItem", "OrderItem")
@@ -1560,13 +1344,6 @@ namespace ClothingAPI.Migrations
                     b.Navigation("CartItems");
 
                     b.Navigation("OrderItems");
-
-                    b.Navigation("PurchaseOrderItems");
-                });
-
-            modelBuilder.Entity("ClothingAPI.Models.PurchaseOrder", b =>
-                {
-                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("ClothingAPI.Models.Role", b =>
@@ -1579,11 +1356,6 @@ namespace ClothingAPI.Migrations
                     b.Navigation("ProductVariants");
                 });
 
-            modelBuilder.Entity("ClothingAPI.Models.Supplier", b =>
-                {
-                    b.Navigation("PurchaseOrders");
-                });
-
             modelBuilder.Entity("ClothingAPI.Models.User", b =>
                 {
                     b.Navigation("Addresses");
@@ -1593,8 +1365,6 @@ namespace ClothingAPI.Migrations
                     b.Navigation("ChangedOrderStatusHistories");
 
                     b.Navigation("CouponUsages");
-
-                    b.Navigation("CreatedPurchaseOrders");
 
                     b.Navigation("Orders");
 

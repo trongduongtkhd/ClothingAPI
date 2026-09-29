@@ -139,6 +139,8 @@ public class OrderService : IOrderService
                 ColorName = variant.Color.ColorName,
                 SizeName = variant.Size.SizeName,
                 UnitPrice = unitPrice,
+                // Chốt giá vốn tại thời điểm bán để tính lợi nhuận về sau.
+                UnitCost = variant.AverageCostPrice ?? 0m,
                 Quantity = cartItem.Quantity,
                 TotalPrice = unitPrice * cartItem.Quantity
             });
