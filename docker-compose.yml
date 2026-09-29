@@ -43,6 +43,12 @@ services:
       JwtSettings__SecretKey: ${JWT_SECRET_KEY}
       JwtSettings__Issuer: ${JWT_ISSUER}
       JwtSettings__Audience: ${JWT_AUDIENCE}
+      # Tài khoản admin được tạo tự động ở lần chạy đầu (khi DB chưa có admin nào).
+      AdminSeedSettings__Email: ${ADMIN_EMAIL:-}
+      AdminSeedSettings__Password: ${ADMIN_PASSWORD:-}
+      # Tùy chọn: Gmail + App Password để gửi mail quên mật khẩu.
+      EmailSettings__SenderEmail: ${EMAIL_SENDER:-}
+      EmailSettings__AppPassword: ${EMAIL_APP_PASSWORD:-}
 
     ports:
       - "8080:8080"
@@ -58,7 +64,9 @@ services:
 
   frontend:
     build:
-      context: ../../Angular/ShopQuanAo/shop-clothing-ui
+      # Mặc định: repo frontend nằm cạnh repo backend (cùng thư mục cha).
+      # Có thể đổi bằng biến FRONTEND_PATH trong file .env.
+      context: ${FRONTEND_PATH:-../shop-clothing-ui}
       dockerfile: Dockerfile
 
     container_name: clothing-frontend
