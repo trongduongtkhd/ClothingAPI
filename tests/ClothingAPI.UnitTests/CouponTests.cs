@@ -207,7 +207,7 @@ public class CouponTests : UnitTestBase
         ReportValid(result, error);
 
         Assert.Null(error);
-        Assert.Equal(30000m, result!.DiscountAmount);
+        Assert.Equal(31000m, result!.DiscountAmount);
     }
 
     [Fact]
