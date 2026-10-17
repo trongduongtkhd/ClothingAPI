@@ -23,7 +23,7 @@ namespace ClothingAPI.DTOs.PurchaseOrders
         [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0.")]
         public int Quantity { get; set; }
 
-        [Range(0, double.MaxValue, ErrorMessage = "Đơn giá nhập không hợp lệ.")]
+        [Range(typeof(decimal), "0.01", "9999999999999999", ErrorMessage = "Đơn giá nhập phải lớn hơn 0.")]
         public decimal UnitCost { get; set; }
     }
 }

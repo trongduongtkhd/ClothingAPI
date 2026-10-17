@@ -237,7 +237,7 @@ public class StorefrontService : IStorefrontService
                 .Where(x => x.IsActive)
                 .OrderBy(x => x.Color.ColorName)
                 .ThenBy(x => x.Size.DisplayOrder)
-                .Select(MapVariantDto)
+                .Select(x => MapVariantDto(x, product))
                 .ToList()
         };
     }
@@ -307,7 +307,7 @@ public class StorefrontService : IStorefrontService
         };
     }
 
-    private static ProductVariantDto MapVariantDto(ProductVariant variant)
+    private static ProductVariantDto MapVariantDto(ProductVariant variant, Product product)
     {
         return new ProductVariantDto
         {
@@ -320,6 +320,8 @@ public class StorefrontService : IStorefrontService
             SKU = variant.SKU,
             Price = variant.Price,
             SalePrice = variant.SalePrice,
+            EffectivePrice = PriceHelper.GetEffectivePrice(variant, product),
+            EffectiveSalePrice = PriceHelper.GetEffectiveSalePrice(variant, product),
             StockQuantity = variant.StockQuantity,
             ImageUrl = variant.ImageUrl,
             IsActive = variant.IsActive

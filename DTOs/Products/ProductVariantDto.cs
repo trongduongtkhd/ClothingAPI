@@ -16,9 +16,15 @@
 
         public string SKU { get; set; } = string.Empty;
 
-        public decimal Price { get; set; }
+        // Giá riêng của biến thể, null = theo giá sản phẩm.
+        public decimal? Price { get; set; }
 
         public decimal? SalePrice { get; set; }
+
+        // Giá thực tế đang áp dụng (đã tính kế thừa từ sản phẩm).
+        public decimal EffectivePrice { get; set; }
+
+        public decimal? EffectiveSalePrice { get; set; }
 
         public int StockQuantity { get; set; }
 

@@ -6,6 +6,7 @@ using ClothingAPI.Helpers;
 using ClothingAPI.Models;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 namespace ClothingAPI.Services.Implementations;
 
@@ -246,7 +247,7 @@ public class CouponService : ICouponService
 
         foreach (var cartItem in cartItems)
         {
-            var unitPrice = cartItem.Variant.SalePrice ?? cartItem.Variant.Price;
+            var unitPrice = PriceHelper.GetUnitPrice(cartItem.Variant);
 
             var itemTotal = unitPrice * cartItem.Quantity;
 
@@ -272,7 +273,7 @@ public class CouponService : ICouponService
         if (eligibleSubtotal < coupon.MinOrderAmount)
         {
             throw new BadRequestException(
-                $"Đơn hàng hợp lệ phải từ {coupon.MinOrderAmount:N0}đ để dùng mã này."
+                $"Đơn hàng hợp lệ phải từ {coupon.MinOrderAmount.ToString("N0", new CultureInfo("vi-VN"))} đ để dùng mã này."
             );
         }
 
@@ -490,7 +491,7 @@ public class CouponService : ICouponService
 
         var subtotal = cartItems.Sum(x =>
         {
-            var unitPrice = x.Variant.SalePrice ?? x.Variant.Price;
+            var unitPrice = PriceHelper.GetUnitPrice(x.Variant);
             return unitPrice * x.Quantity;
         });
 
@@ -523,7 +524,7 @@ public class CouponService : ICouponService
 
             foreach (var cartItem in cartItems)
             {
-                var unitPrice = cartItem.Variant.SalePrice ?? cartItem.Variant.Price;
+                var unitPrice = PriceHelper.GetUnitPrice(cartItem.Variant);
 
                 var itemTotal = unitPrice * cartItem.Quantity;
 

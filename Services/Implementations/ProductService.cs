@@ -193,7 +193,7 @@ public class ProductService : IProductService
     public async Task<ProductVariantDto> CreateVariantAsync(int productId, UpsertProductVariantDto dto)
 
     {
-        ValidatePrice(dto.Price, dto.SalePrice);
+        ValidateVariantPrice(dto.Price, dto.SalePrice);
 
         await EnsureProductExistsAsync(productId);
         await ValidateColorAndSizeAsync(dto.ColorId, dto.SizeId);
@@ -242,7 +242,7 @@ public class ProductService : IProductService
 
     public async Task<ProductVariantDto> UpdateVariantAsync(int productId, int variantId, UpsertProductVariantDto dto)
     {
-        ValidatePrice(dto.Price, dto.SalePrice);
+        ValidateVariantPrice(dto.Price, dto.SalePrice);
 
         var variant = await _context.ProductVariants.FirstOrDefaultAsync(x => x.VariantId == variantId && x.ProductId == productId);
 
@@ -446,6 +446,7 @@ public class ProductService : IProductService
     {
         var variant = await _context.ProductVariants
             .AsNoTracking()
+            .Include(x => x.Product)
             .Include(x => x.Color)
             .Include(x => x.Size)
             .FirstOrDefaultAsync(x => x.VariantId == variantId);
@@ -455,7 +456,7 @@ public class ProductService : IProductService
             throw new NotFoundException("Không tìm thấy biến thể sản phẩm.");
         }
 
-        return MapVariantDto(variant);
+        return MapVariantDto(variant, variant.Product);
     }
 
     private async Task ClearProductThumbnailAsync(int productId, int? excludedImageId = null)
@@ -510,6 +511,25 @@ public class ProductService : IProductService
         }
     }
 
+    // Giá biến thể được phép để trống (kế thừa giá sản phẩm), nhưng khi đó không được nhập giá giảm riêng
+    // vì giá giảm của biến thể luôn đi kèm giá gốc của chính biến thể.
+    private static void ValidateVariantPrice(decimal? price, decimal? salePrice)
+    {
+        if (!price.HasValue)
+        {
+            if (salePrice.HasValue)
+            {
+                throw new BadRequestException(
+                    "Muốn đặt giá giảm riêng cho biến thể thì phải nhập giá riêng của biến thể."
+                );
+            }
+
+            return;
+        }
+
+        ValidatePrice(price.Value, salePrice);
+    }
+
     private static string? NormalizeNullableText(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
@@ -539,7 +559,7 @@ public class ProductService : IProductService
             Variants = product.ProductVariants
                 .OrderBy(x => x.Color.ColorName)
                 .ThenBy(x => x.Size.DisplayOrder)
-                .Select(MapVariantDto)
+                .Select(x => MapVariantDto(x, product))
                 .ToList(),
             Images = product.ProductImages
                 .OrderByDescending(x => x.IsThumbnail)
@@ -549,7 +569,7 @@ public class ProductService : IProductService
         };
     }
 
-    private static ProductVariantDto MapVariantDto(ProductVariant variant)
+    private static ProductVariantDto MapVariantDto(ProductVariant variant, Product product)
     {
         return new ProductVariantDto
         {
@@ -562,6 +582,8 @@ public class ProductService : IProductService
             SKU = variant.SKU,
             Price = variant.Price,
             SalePrice = variant.SalePrice,
+            EffectivePrice = PriceHelper.GetEffectivePrice(variant, product),
+            EffectiveSalePrice = PriceHelper.GetEffectiveSalePrice(variant, product),
             StockQuantity = variant.StockQuantity,
             AverageCostPrice = variant.AverageCostPrice,
             ImageUrl = variant.ImageUrl,

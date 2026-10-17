@@ -12,7 +12,8 @@
 
         public string SKU { get; set; } = string.Empty;
 
-        public decimal Price { get; set; }
+        // Null = bán theo giá sản phẩm. Chỉ nhập khi biến thể có giá riêng (ví dụ size lớn đắt hơn).
+        public decimal? Price { get; set; }
 
         public decimal? SalePrice { get; set; }
 

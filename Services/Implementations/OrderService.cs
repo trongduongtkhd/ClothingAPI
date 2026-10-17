@@ -73,7 +73,7 @@ public class OrderService : IOrderService
                 );
             }
 
-            var unitPrice = variant.SalePrice ?? variant.Price;
+            var unitPrice = PriceHelper.GetUnitPrice(variant);
 
             subtotal += unitPrice * cartItem.Quantity;
         }
@@ -129,7 +129,7 @@ public class OrderService : IOrderService
         foreach (var cartItem in cartItems)
         {
             var variant = cartItem.Variant;
-            var unitPrice = variant.SalePrice ?? variant.Price;
+            var unitPrice = PriceHelper.GetUnitPrice(variant);
 
             order.OrderItems.Add(new OrderItem
             {

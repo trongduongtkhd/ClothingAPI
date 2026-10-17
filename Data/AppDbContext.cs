@@ -350,8 +350,7 @@ namespace ClothingAPI.Data
                 }).IsUnique();
 
                 entity.Property(x => x.Price)
-                    .HasPrecision(18, 2)
-                    .IsRequired();
+                    .HasPrecision(18, 2);
 
                 entity.Property(x => x.SalePrice)
                     .HasPrecision(18, 2);

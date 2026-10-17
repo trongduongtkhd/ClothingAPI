@@ -1,6 +1,7 @@
 ﻿using ClothingAPI.Data;
 using ClothingAPI.DTOs.Cart;
 using ClothingAPI.Exceptions;
+using ClothingAPI.Helpers;
 using ClothingAPI.Models;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -190,7 +191,7 @@ public class CartService : ICartService
                 .Select(x => x.ImageUrl)
                 .FirstOrDefault();
 
-        var unitPrice = variant.SalePrice ?? variant.Price;
+        var unitPrice = PriceHelper.GetUnitPrice(variant);
 
         return new CartItemDto
         {

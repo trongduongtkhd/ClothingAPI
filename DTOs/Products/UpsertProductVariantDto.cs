@@ -15,7 +15,8 @@ namespace ClothingAPI.DTOs.Products
         public string SKU { get; set; } = string.Empty;
 
         [Range(typeof(decimal), "0.01", "9999999999999999")]
-        public decimal Price { get; set; }
+        // Để trống = bán theo giá sản phẩm.
+        public decimal? Price { get; set; }
 
         [Range(typeof(decimal), "0.01", "9999999999999999")]
         public decimal? SalePrice { get; set; }
