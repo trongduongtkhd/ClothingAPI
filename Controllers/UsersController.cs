@@ -58,7 +58,7 @@ public class UsersController : ControllerBase
 
         return Ok(new ApiResponse<object>(
             true,
-            "Đổi mật khẩu thành công."
+            "Đổi mật khẩu thành công. Vui lòng đăng nhập lại."
         ));
     }
 }

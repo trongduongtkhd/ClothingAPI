@@ -23,7 +23,7 @@ public class LoginLockoutTests : UnitTestBase
 
     public LoginLockoutTests(ITestOutputHelper output) : base(output)
     {
-        _tokenService.Setup(x => x.CreateToken(It.IsAny<User>(), It.IsAny<IEnumerable<string>>())).Returns("fake-token");
+        _tokenService.Setup(x => x.CreateToken(It.IsAny<User>(), It.IsAny<IEnumerable<string>>())).Returns(("fake-token", DateTime.UtcNow.AddMinutes(15)));
     }
 
     private async Task<(AuthResponseDto? Result, Exception? Error)> LoginAsync(string password)
@@ -34,7 +34,8 @@ public class LoginLockoutTests : UnitTestBase
             _tokenService.Object,
             Mock.Of<IEmailService>(),
             Options.Create(new FrontendSettings { BaseUrl = "http://localhost:4200" }),
-            NullLogger<AuthService>.Instance);
+            NullLogger<AuthService>.Instance,
+            Mock.Of<IRefreshTokenService>());
 
         AuthResponseDto? result = null;
         var error = await CaptureAsync(async () => result = await service.LoginAsync(new LoginDto { Email = Email, Password = password }));

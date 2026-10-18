@@ -3,6 +3,7 @@ using ClothingAPI.DTOs.Colors;
 using ClothingAPI.DTOs.Products;
 using ClothingAPI.DTOs.Sizes;
 using ClothingAPI.DTOs.Storefront;
+using ClothingAPI.Enums;
 using ClothingAPI.Exceptions;
 using ClothingAPI.Helpers;
 using ClothingAPI.Models;
@@ -134,9 +135,14 @@ public class StorefrontService : IStorefrontService
                 x => x.SalePrice ?? x.BasePrice
             ),
 
-            // Chưa có OrderItems nên tạm thời sắp xếp newest.
-            // Ta sẽ cập nhật bestSelling khi làm Order.
-            "bestselling" => products.OrderByDescending(x => x.CreatedAt),
+            // Tổng số lượng đã bán trong các đơn Completed (giống dashboard admin),
+            // cùng số lượng thì sản phẩm mới hơn đứng trước.
+            "bestselling" => products
+                .OrderByDescending(x => x.ProductVariants
+                    .SelectMany(v => v.OrderItems)
+                    .Where(oi => oi.Order.OrderStatus == OrderStatus.Completed)
+                    .Sum(oi => (int?)oi.Quantity) ?? 0)
+                .ThenByDescending(x => x.CreatedAt),
 
             _ => products.OrderByDescending(x => x.CreatedAt)
         };

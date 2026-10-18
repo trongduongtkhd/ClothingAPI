@@ -63,6 +63,7 @@ namespace ClothingAPI
 
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection("FrontendSettings"));
+            builder.Services.Configure<RefreshTokenSettings>(builder.Configuration.GetSection("RefreshTokenSettings"));
 
             builder.Services.AddAuthentication(options =>
             {
@@ -107,11 +108,15 @@ namespace ClothingAPI
                 {
                     policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          // Cho phép trình duyệt gửi/nhận cookie refresh token khi frontend khác origin (localhost:4200 -> :8080).
+                          // Hợp lệ vì đã whitelist origin cụ thể (không dùng AllowAnyOrigin).
+                          .AllowCredentials();
                 });
             });
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IBrandService, BrandService>();

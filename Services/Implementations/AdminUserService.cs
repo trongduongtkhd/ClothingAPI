@@ -1,4 +1,5 @@
 ﻿using ClothingAPI.Data;
+using ClothingAPI.DTOs.Auth;
 using ClothingAPI.DTOs.Users;
 using ClothingAPI.Exceptions;
 using ClothingAPI.Helpers;
@@ -11,10 +12,12 @@ namespace ClothingAPI.Services.Implementations;
 public class AdminUserService : IAdminUserService
 {
     private readonly AppDbContext _context;
+    private readonly IRefreshTokenService _refreshTokenService;
 
-    public AdminUserService(AppDbContext context)
+    public AdminUserService(AppDbContext context, IRefreshTokenService refreshTokenService)
     {
         _context = context;
+        _refreshTokenService = refreshTokenService;
     }
 
     public async Task<PagedResult<AdminUserDto>> GetAllAsync(AdminUserQueryDto query)
@@ -108,7 +111,17 @@ public class AdminUserService : IAdminUserService
         user.IsActive = isActive;
         user.UpdatedAt = DateTime.UtcNow;
 
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         await _context.SaveChangesAsync();
+
+        // Khóa tài khoản => thu hồi ngay mọi phiên, không chỉ dựa vào kiểm tra IsActive lúc refresh.
+        if (!isActive)
+        {
+            await _refreshTokenService.RevokeAllForUserAsync(targetUserId, RefreshTokenRevokeReasons.AccountDisabled);
+        }
+
+        await transaction.CommitAsync();
     }
 
     private static AdminUserDto MapToDto(User user)

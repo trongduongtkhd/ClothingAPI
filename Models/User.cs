@@ -38,6 +38,7 @@
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
         public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
         public ICollection<PurchaseOrder> CreatedPurchaseOrders { get; set; } = new List<PurchaseOrder>();
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     }
 }

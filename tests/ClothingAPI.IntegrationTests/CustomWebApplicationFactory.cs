@@ -48,6 +48,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         builder.UseSetting("ConnectionStrings:DefaultConnection", "DataSource=:memory:");
         builder.UseSetting("AdminSeedSettings:Email", "");
         builder.UseSetting("AdminSeedSettings:Password", "");
+        // Test client chạy http://localhost: cookie Secure sẽ không được gửi lại.
+        builder.UseSetting("RefreshTokenSettings:CookieSecure", "false");
+        builder.UseSetting("RefreshTokenSettings:ReuseGraceSeconds", "0");
 
         builder.ConfigureTestServices(services =>
         {

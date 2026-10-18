@@ -11,9 +11,11 @@ namespace ClothingAPI.Services.Implementations;
 public class UserProfileService : IUserProfileService
 {
     private readonly AppDbContext _context;
-    public UserProfileService(AppDbContext context)
+    private readonly IRefreshTokenService _refreshTokenService;
+    public UserProfileService(AppDbContext context, IRefreshTokenService refreshTokenService)
     {
         _context = context;
+        _refreshTokenService = refreshTokenService;
     }
 
     public async Task<CurrentUserDto> GetProfileAsync(int userId)
@@ -70,7 +72,13 @@ public class UserProfileService : IUserProfileService
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
         user.UpdatedAt = DateTime.UtcNow;
 
+        // Đổi mật khẩu => thu hồi mọi refresh token (kể cả thiết bị hiện tại), người dùng phải đăng nhập lại.
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
         await _context.SaveChangesAsync();
+        await _refreshTokenService.RevokeAllForUserAsync(userId, RefreshTokenRevokeReasons.PasswordChanged);
+
+        await transaction.CommitAsync();
     }
 
     private async Task<User> GetUserWithRolesAsync(int userId)

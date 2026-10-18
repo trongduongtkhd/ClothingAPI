@@ -44,6 +44,7 @@ namespace ClothingAPI.Data
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -80,6 +81,8 @@ namespace ClothingAPI.Data
             ConfigureSupplier(modelBuilder);
             ConfigurePurchaseOrder(modelBuilder);
             ConfigurePurchaseOrderItem(modelBuilder);
+
+            ConfigureRefreshToken(modelBuilder);
 
             SeedRoles(modelBuilder);
         }
@@ -510,6 +513,49 @@ namespace ClothingAPI.Data
                     .WithMany(x => x.WishlistItems)
                     .HasForeignKey(x => x.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        private static void ConfigureRefreshToken(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<RefreshToken>(entity =>
+            {
+                entity.ToTable("RefreshTokens");
+
+                entity.HasKey(x => x.RefreshTokenId);
+
+                // SHA-256 dạng hex = 64 ký tự. Unique để tra cứu token theo hash.
+                entity.Property(x => x.TokenHash)
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                entity.HasIndex(x => x.TokenHash)
+                    .IsUnique();
+
+                entity.HasIndex(x => x.FamilyId);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.Property(x => x.CreatedByIp)
+                    .HasMaxLength(45);
+
+                entity.Property(x => x.UserAgent)
+                    .HasMaxLength(512);
+
+                entity.Property(x => x.RevokedReason)
+                    .HasMaxLength(50);
+
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.RefreshTokens)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                // Tự tham chiếu: không cascade để tránh lỗi "multiple cascade paths" của SQL Server.
+                entity.HasOne(x => x.ReplacedByToken)
+                    .WithMany()
+                    .HasForeignKey(x => x.ReplacedByTokenId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
         }
 

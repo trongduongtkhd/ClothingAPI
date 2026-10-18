@@ -18,7 +18,7 @@ namespace ClothingAPI.Services.Implementations
             _jwtSettings = jwtOptions.Value;
         }
 
-        public string CreateToken(User user, IEnumerable<string> roles)
+        public (string Token, DateTime ExpiresAt) CreateToken(User user, IEnumerable<string> roles)
         {
             var claims = new List<Claim>
         {
@@ -53,7 +53,7 @@ namespace ClothingAPI.Services.Implementations
                 signingCredentials: credentials
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return (new JwtSecurityTokenHandler().WriteToken(token), expiresAt);
         }
     }
 }

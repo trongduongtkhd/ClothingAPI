@@ -20,19 +20,22 @@ namespace ClothingAPI.Services.Implementations
         private readonly IEmailService _emailService;
         private readonly FrontendSettings _frontendSettings;
         private readonly ILogger<AuthService> _logger;
+        private readonly IRefreshTokenService _refreshTokenService;
 
         public AuthService(
             AppDbContext context,
             ITokenService tokenService,
             IEmailService emailService,
             IOptions<FrontendSettings> frontendSettings,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IRefreshTokenService refreshTokenService)
         {
             _context = context;
             _tokenService = tokenService;
             _emailService = emailService;
             _frontendSettings = frontendSettings.Value;
             _logger = logger;
+            _refreshTokenService = refreshTokenService;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
@@ -181,6 +184,22 @@ namespace ClothingAPI.Services.Implementations
             };
         }
 
+        public async Task<AuthResponseDto> CreateAuthResponseForUserAsync(int userId)
+        {
+            var user = await _context.Users
+                .AsNoTracking()
+                .Include(x => x.UserRoles)
+                .ThenInclude(x => x.Role)
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (user is null)
+            {
+                throw new UnauthorizedException("Không tìm thấy người dùng.");
+            }
+
+            return CreateAuthResponse(user, user.UserRoles.Select(x => x.Role.RoleName).ToList());
+        }
+
         public async Task ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
             var email = forgotPasswordDto.Email.Trim().ToLower();
@@ -233,7 +252,13 @@ namespace ClothingAPI.Services.Implementations
             user.ResetPasswordTokenExpiry = null;
             user.UpdatedAt = DateTime.UtcNow;
 
+            // Đặt lại mật khẩu (thường vì nghi bị lộ) => đăng xuất mọi thiết bị. Cùng transaction để không có trạng thái nửa vời.
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
             await _context.SaveChangesAsync();
+            await _refreshTokenService.RevokeAllForUserAsync(user.UserId, RefreshTokenRevokeReasons.PasswordReset);
+
+            await transaction.CommitAsync();
         }
 
         private static string GenerateResetToken()
@@ -243,9 +268,8 @@ namespace ClothingAPI.Services.Implementations
 
         private AuthResponseDto CreateAuthResponse(User user, List<string> roles)
         {
-            var expiresAt = DateTime.UtcNow.AddMinutes(120);
-
-            var accessToken = _tokenService.CreateToken(user, roles);
+            // Thời hạn lấy từ JwtSettings:ExpirationMinutes (nguồn cấu hình duy nhất, nằm trong TokenService).
+            var (accessToken, expiresAt) = _tokenService.CreateToken(user, roles);
 
             return new AuthResponseDto
             {

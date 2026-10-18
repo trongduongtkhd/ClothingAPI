@@ -43,6 +43,13 @@ services:
       JwtSettings__SecretKey: ${JWT_SECRET_KEY}
       JwtSettings__Issuer: ${JWT_ISSUER}
       JwtSettings__Audience: ${JWT_AUDIENCE}
+      # Thời hạn access token (phút). Đặt JWT_EXPIRATION_MINUTES=1 trong .env để demo refresh token.
+      JwtSettings__ExpirationMinutes: ${JWT_EXPIRATION_MINUTES:-15}
+      # Cookie refresh token: bật Secure (trình duyệt vẫn chấp nhận trên http://localhost).
+      # Truy cập qua IP/hostname khác bằng HTTP thì đặt REFRESH_COOKIE_SECURE=false.
+      RefreshTokenSettings__CookieSecure: ${REFRESH_COOKIE_SECURE:-true}
+      # Khoảng "ân hạn" (giây) cho 2 request refresh gần như đồng thời; đặt 0 để tắt khi demo reuse detection.
+      RefreshTokenSettings__ReuseGraceSeconds: ${REFRESH_REUSE_GRACE_SECONDS:-10}
       # Tài khoản admin được tạo tự động ở lần chạy đầu (khi DB chưa có admin nào).
       AdminSeedSettings__Email: ${ADMIN_EMAIL:-}
       AdminSeedSettings__Password: ${ADMIN_PASSWORD:-}

@@ -890,6 +890,65 @@ namespace ClothingAPI.Migrations
                     b.ToTable("PurchaseOrderItems", (string)null);
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("RefreshTokenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RefreshTokenId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("ReplacedByTokenId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RevokedReason")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RefreshTokenId");
+
+                    b.HasIndex("FamilyId");
+
+                    b.HasIndex("ReplacedByTokenId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens", (string)null);
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
                 {
                     b.Property<int>("ReviewId")
@@ -1438,6 +1497,24 @@ namespace ClothingAPI.Migrations
                     b.Navigation("Variant");
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.RefreshToken", b =>
+                {
+                    b.HasOne("ClothingAPI.Models.RefreshToken", "ReplacedByToken")
+                        .WithMany()
+                        .HasForeignKey("ReplacedByTokenId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("ClothingAPI.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ReplacedByToken");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
                 {
                     b.HasOne("ClothingAPI.Models.OrderItem", "OrderItem")
@@ -1597,6 +1674,8 @@ namespace ClothingAPI.Migrations
                     b.Navigation("CreatedPurchaseOrders");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("Reviews");
 
