@@ -13,5 +13,7 @@
         public string? AvatarUrl { get; set; }
 
         public List<string> Roles { get; set; } = [];
+
+        public bool TwoFactorEnabled { get; set; }
     }
 }

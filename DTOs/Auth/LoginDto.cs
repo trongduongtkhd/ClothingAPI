@@ -10,5 +10,9 @@ namespace ClothingAPI.DTOs.Auth
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
         public string Password { get; set; } = string.Empty;
+
+        // Token Cloudflare Turnstile (dùng một lần, hết hạn sau ~5 phút).
+        [Required(ErrorMessage = "Vui lòng hoàn tất xác minh CAPTCHA.")]
+        public string CaptchaToken { get; set; } = string.Empty;
     }
 }

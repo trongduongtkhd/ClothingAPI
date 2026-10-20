@@ -45,6 +45,8 @@ namespace ClothingAPI.Data
         public DbSet<PurchaseOrder> PurchaseOrders { get; set; }
         public DbSet<PurchaseOrderItem> PurchaseOrderItems { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<TwoFactorRecoveryCode> TwoFactorRecoveryCodes { get; set; }
+        public DbSet<TwoFactorChallenge> TwoFactorChallenges { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -83,6 +85,8 @@ namespace ClothingAPI.Data
             ConfigurePurchaseOrderItem(modelBuilder);
 
             ConfigureRefreshToken(modelBuilder);
+            ConfigureTwoFactorRecoveryCode(modelBuilder);
+            ConfigureTwoFactorChallenge(modelBuilder);
 
             SeedRoles(modelBuilder);
         }
@@ -120,6 +124,10 @@ namespace ClothingAPI.Data
 
                 entity.Property(x => x.CreatedAt)
                     .HasDefaultValueSql("GETUTCDATE()");
+
+                // Chuỗi do IDataProtector sinh ra (base64url) dài hơn nhiều so với Base32 gốc 32 ký tự.
+                entity.Property(x => x.TwoFactorSecretProtected)
+                    .HasMaxLength(500);
             });
         }
 
@@ -556,6 +564,62 @@ namespace ClothingAPI.Data
                     .WithMany()
                     .HasForeignKey(x => x.ReplacedByTokenId)
                     .OnDelete(DeleteBehavior.NoAction);
+            });
+        }
+
+        private static void ConfigureTwoFactorRecoveryCode(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TwoFactorRecoveryCode>(entity =>
+            {
+                entity.ToTable("TwoFactorRecoveryCodes");
+
+                entity.HasKey(x => x.TwoFactorRecoveryCodeId);
+
+                // HMAC-SHA256 dạng hex = 64 ký tự.
+                entity.Property(x => x.CodeHash)
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                entity.HasIndex(x => new { x.UserId, x.CodeHash });
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.TwoFactorRecoveryCodes)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+        }
+
+        private static void ConfigureTwoFactorChallenge(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<TwoFactorChallenge>(entity =>
+            {
+                entity.ToTable("TwoFactorChallenges");
+
+                entity.HasKey(x => x.TwoFactorChallengeId);
+
+                // SHA-256 dạng hex = 64 ký tự. Unique để tra cứu challenge theo hash.
+                entity.Property(x => x.TokenHash)
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                entity.HasIndex(x => x.TokenHash)
+                    .IsUnique();
+
+                entity.HasIndex(x => x.UserId);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.Property(x => x.CreatedByIp)
+                    .HasMaxLength(45);
+
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.TwoFactorChallenges)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
 

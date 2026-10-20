@@ -180,7 +180,7 @@ public class RefreshTokenIntegrationTests : IClassFixture<CustomWebApplicationFa
         // Trình duyệt vẫn đang giữ cookie của A khi đăng nhập tài khoản B.
         var request = new HttpRequestMessage(HttpMethod.Post, "/api/auth/login")
         {
-            Content = System.Net.Http.Json.JsonContent.Create(new { email = emailB, password = DefaultPassword })
+            Content = System.Net.Http.Json.JsonContent.Create(new { email = emailB, password = DefaultPassword, captchaToken = FakeTurnstileService.PassToken })
         };
         request.Headers.Add("Cookie", $"{CookieName}={tokenA}");
         var loginB = await client.SendAsync(request);

@@ -21,6 +21,7 @@ namespace ClothingAPI.Services.Implementations
         private readonly FrontendSettings _frontendSettings;
         private readonly ILogger<AuthService> _logger;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly ITwoFactorService _twoFactorService;
 
         public AuthService(
             AppDbContext context,
@@ -28,7 +29,8 @@ namespace ClothingAPI.Services.Implementations
             IEmailService emailService,
             IOptions<FrontendSettings> frontendSettings,
             ILogger<AuthService> logger,
-            IRefreshTokenService refreshTokenService)
+            IRefreshTokenService refreshTokenService,
+            ITwoFactorService twoFactorService)
         {
             _context = context;
             _tokenService = tokenService;
@@ -36,6 +38,7 @@ namespace ClothingAPI.Services.Implementations
             _frontendSettings = frontendSettings.Value;
             _logger = logger;
             _refreshTokenService = refreshTokenService;
+            _twoFactorService = twoFactorService;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
@@ -77,10 +80,7 @@ namespace ClothingAPI.Services.Implementations
             return CreateAuthResponse(user, ["Customer"]);
         }
 
-        private const int MaxFailedLoginAttempts = 5;
-        private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
-
-        public async Task<AuthResponseDto> LoginAsync(LoginDto loginDto)
+        public async Task<LoginResult> LoginAsync(LoginDto loginDto, string? ip = null)
         {
             var email = loginDto.Email.Trim().ToLower();
 
@@ -89,13 +89,8 @@ namespace ClothingAPI.Services.Implementations
                 .ThenInclude(x => x.Role)
                 .FirstOrDefaultAsync(x => x.Email == email);
 
-            if (user is not null &&
-                user.LockoutEndUtc.HasValue &&
-                user.LockoutEndUtc.Value > DateTime.UtcNow)
+            if (user is not null && AccountLockout.IsLockedOut(user, DateTime.UtcNow, out var remainingMinutes))
             {
-                var remainingMinutes = (int)Math.Ceiling(
-                    (user.LockoutEndUtc.Value - DateTime.UtcNow).TotalMinutes);
-
                 _logger.LogWarning(
                     "Từ chối đăng nhập: tài khoản {Email} đang bị khóa đến {LockoutEnd} UTC (còn {RemainingMinutes} phút).",
                     email, user.LockoutEndUtc.Value, remainingMinutes
@@ -110,7 +105,8 @@ namespace ClothingAPI.Services.Implementations
             {
                 if (user is not null)
                 {
-                    await RegisterFailedLoginAsync(user);
+                    AccountLockout.RegisterFailure(user, DateTime.UtcNow, _logger, "Đăng nhập");
+                    await _context.SaveChangesAsync();
                 }
 
                 throw new UnauthorizedException("Email hoặc mật khẩu không đúng.");
@@ -121,6 +117,15 @@ namespace ClothingAPI.Services.Implementations
                 throw new UnauthorizedException("Tài khoản của bạn đã bị khóa.");
             }
 
+            if (user.TwoFactorEnabled)
+            {
+                // Mật khẩu đúng mới chỉ là lớp 1: KHÔNG cấp token và KHÔNG reset bộ đếm sai. Nếu reset ở đây,
+                // kẻ biết mật khẩu cứ đoán sai mã 4 lần rồi đăng nhập lại là bộ đếm về 0, giới hạn theo user mất tác dụng.
+                var challenge = await _twoFactorService.CreateLoginChallengeAsync(user.UserId, ip);
+
+                return new LoginResult(null, challenge);
+            }
+
             if (user.FailedLoginAttempts > 0 || user.LockoutEndUtc.HasValue)
             {
                 _logger.LogInformation(
@@ -128,37 +133,13 @@ namespace ClothingAPI.Services.Implementations
                     user.Email
                 );
 
-                user.FailedLoginAttempts = 0;
-                user.LockoutEndUtc = null;
+                AccountLockout.Reset(user);
                 await _context.SaveChangesAsync();
             }
 
             var roles = user.UserRoles.Select(x => x.Role.RoleName).ToList();
 
-            return CreateAuthResponse(user, roles);
-        }
-
-        private async Task RegisterFailedLoginAsync(User user)
-        {
-            user.FailedLoginAttempts += 1;
-
-            _logger.LogWarning(
-                "Đăng nhập sai lần {Attempt}/{MaxAttempts} cho tài khoản {Email}.",
-                user.FailedLoginAttempts, MaxFailedLoginAttempts, user.Email
-            );
-
-            if (user.FailedLoginAttempts >= MaxFailedLoginAttempts)
-            {
-                user.LockoutEndUtc = DateTime.UtcNow.Add(LockoutDuration);
-                user.FailedLoginAttempts = 0;
-
-                _logger.LogWarning(
-                    "Tài khoản {Email} bị khóa đến {LockoutEnd} UTC do đăng nhập sai {MaxAttempts} lần liên tiếp.",
-                    user.Email, user.LockoutEndUtc.Value, MaxFailedLoginAttempts
-                );
-            }
-
-            await _context.SaveChangesAsync();
+            return new LoginResult(CreateAuthResponse(user, roles), null);
         }
 
         public async Task<CurrentUserDto> GetCurrentUserAsync(int userId)
@@ -180,7 +161,8 @@ namespace ClothingAPI.Services.Implementations
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 AvatarUrl = user.AvatarUrl,
-                Roles = user.UserRoles.Select(x => x.Role.RoleName).ToList()
+                Roles = user.UserRoles.Select(x => x.Role.RoleName).ToList(),
+                TwoFactorEnabled = user.TwoFactorEnabled
             };
         }
 
@@ -282,7 +264,8 @@ namespace ClothingAPI.Services.Implementations
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     AvatarUrl = user.AvatarUrl,
-                    Roles = roles
+                    Roles = roles,
+                    TwoFactorEnabled = user.TwoFactorEnabled
                 }
             };
         }

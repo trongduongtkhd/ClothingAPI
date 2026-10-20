@@ -36,18 +36,21 @@ public static class TestHelpers
         return document.RootElement.Clone();
     }
 
-    public static Task<HttpResponseMessage> RegisterAsync(HttpClient client, string email, string password, string fullName = "Khách Test") =>
+    public static Task<HttpResponseMessage> RegisterAsync(HttpClient client, string email, string password, string fullName = "Khách Test",
+        string? captchaToken = FakeTurnstileService.PassToken) =>
         client.PostAsJsonAsync("/api/auth/register", new
         {
             fullName,
             email,
             password,
             confirmPassword = password,
-            phoneNumber = "0900000000"
+            phoneNumber = "0900000000",
+            captchaToken
         });
 
-    public static Task<HttpResponseMessage> LoginAsync(HttpClient client, string email, string password) =>
-        client.PostAsJsonAsync("/api/auth/login", new { email, password });
+    public static Task<HttpResponseMessage> LoginAsync(HttpClient client, string email, string password,
+        string? captchaToken = FakeTurnstileService.PassToken) =>
+        client.PostAsJsonAsync("/api/auth/login", new { email, password, captchaToken });
 
     public static async Task<string> LoginAndGetTokenAsync(HttpClient client, string email, string password)
     {

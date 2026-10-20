@@ -25,6 +25,17 @@
 
         public DateTime? LockoutEndUtc { get; set; }
 
+        // Xác thực hai lớp (TOTP). Secret được mã hóa bằng IDataProtector, không lưu thô.
+        // Có secret nhưng TwoFactorEnabled = false nghĩa là đang thiết lập (chưa nhập mã xác nhận).
+        public bool TwoFactorEnabled { get; set; }
+
+        public string? TwoFactorSecretProtected { get; set; }
+
+        // Bước thời gian (30 giây) của mã TOTP dùng thành công gần nhất: mã có bước <= giá trị này bị từ chối (chống phát lại).
+        public long? TwoFactorLastUsedStep { get; set; }
+
+        public DateTime? TwoFactorEnabledAt { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
@@ -39,6 +50,8 @@
         public ICollection<WishlistItem> WishlistItems { get; set; } = new List<WishlistItem>();
         public ICollection<PurchaseOrder> CreatedPurchaseOrders { get; set; } = new List<PurchaseOrder>();
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+        public ICollection<TwoFactorRecoveryCode> TwoFactorRecoveryCodes { get; set; } = new List<TwoFactorRecoveryCode>();
+        public ICollection<TwoFactorChallenge> TwoFactorChallenges { get; set; } = new List<TwoFactorChallenge>();
 
     }
 }

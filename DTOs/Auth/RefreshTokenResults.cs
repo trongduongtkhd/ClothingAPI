@@ -29,5 +29,7 @@ namespace ClothingAPI.DTOs.Auth
         public const string PasswordReset = "PasswordReset";
         public const string AccountDisabled = "AccountDisabled";
         public const string UserInactive = "UserInactive";
+        // Bật 2FA: các phiên tạo trước đó chưa từng qua 2FA => thu hồi hết, buộc đăng nhập lại bằng 2FA.
+        public const string TwoFactorEnabled = "TwoFactorEnabled";
     }
 }

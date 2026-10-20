@@ -1,6 +1,7 @@
 using ClothingAPI.Data;
 using ClothingAPI.Enums;
 using ClothingAPI.Models;
+using ClothingAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ClothingAPI.IntegrationTests;
 
@@ -20,6 +22,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     public const string ExpiredCouponCode = "EXPIRED10";
 
     public const string JwtSecretKey = "integration-test-secret-key-0123456789-abcdefgh";
+
+    public const string RecoveryCodePepper = "integration-test-recovery-pepper-0123456789-abcdefgh";
+
+    // Chỉ để vượt qua bước kiểm tra cấu hình lúc khởi động; ITurnstileService được thay bằng bản giả (không gọi mạng).
+    public const string TurnstileSecretKey = "integration-test-turnstile-secret";
 
     private readonly SqliteConnection _connection;
 
@@ -34,6 +41,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         // Program đọc JwtSettings ngay trước builder.Build(), nên đặt qua biến môi trường cho chắc chắn.
         Environment.SetEnvironmentVariable("JwtSettings__SecretKey", JwtSecretKey);
+        // Program cũng kiểm tra pepper của mã khôi phục 2FA trước builder.Build().
+        Environment.SetEnvironmentVariable("TwoFactorSettings__RecoveryCodePepper", RecoveryCodePepper);
+        // Program kiểm tra TurnstileSettings:SecretKey trước builder.Build().
+        Environment.SetEnvironmentVariable("TurnstileSettings__SecretKey", TurnstileSecretKey);
     }
 
     public SqliteConnection Connection => _connection;
@@ -51,6 +62,8 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         // Test client chạy http://localhost: cookie Secure sẽ không được gửi lại.
         builder.UseSetting("RefreshTokenSettings:CookieSecure", "false");
         builder.UseSetting("RefreshTokenSettings:ReuseGraceSeconds", "0");
+        builder.UseSetting("TwoFactorSettings:RecoveryCodePepper", RecoveryCodePepper);
+        builder.UseSetting("TurnstileSettings:SecretKey", TurnstileSecretKey);
 
         builder.ConfigureTestServices(services =>
         {
@@ -69,6 +82,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.AddDbContext<AppDbContext>(options => options
                 .UseSqlite(_connection)
                 .ReplaceService<IMigrator, NoOpMigrator>());
+
+            services.RemoveAll<ITurnstileService>();
+            services.AddSingleton<ITurnstileService, FakeTurnstileService>();
         });
 
         CreateSchemaAndSeed();

@@ -35,10 +35,11 @@ public class LoginLockoutTests : UnitTestBase
             Mock.Of<IEmailService>(),
             Options.Create(new FrontendSettings { BaseUrl = "http://localhost:4200" }),
             NullLogger<AuthService>.Instance,
-            Mock.Of<IRefreshTokenService>());
+            Mock.Of<IRefreshTokenService>(),
+            Mock.Of<ITwoFactorService>()); // User trong các test này không bật 2FA.
 
         AuthResponseDto? result = null;
-        var error = await CaptureAsync(async () => result = await service.LoginAsync(new LoginDto { Email = Email, Password = password }));
+        var error = await CaptureAsync(async () => result = (await service.LoginAsync(new LoginDto { Email = Email, Password = password })).Auth);
         return (result, error);
     }
 

@@ -105,7 +105,8 @@ public class UserProfileService : IUserProfileService
             Email = user.Email,
             PhoneNumber = user.PhoneNumber,
             AvatarUrl = user.AvatarUrl,
-            Roles = user.UserRoles.Select(x => x.Role.RoleName).ToList()
+            Roles = user.UserRoles.Select(x => x.Role.RoleName).ToList(),
+            TwoFactorEnabled = user.TwoFactorEnabled
         };
     }
 

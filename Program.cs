@@ -5,6 +5,7 @@ using ClothingAPI.Models;
 using ClothingAPI.Services.Implementations;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -21,17 +22,21 @@ namespace ClothingAPI
             // Ghi log ra cả Console (xem qua `docker logs`) và ra file thật
             // (xoay vòng theo ngày) để demo/kiểm tra sau này - đặc biệt cho
             // các sự kiện bảo mật như đăng nhập sai / khoá tài khoản.
-            builder.Host.UseSerilog((context, configuration) =>
-            {
-                configuration
-                    .MinimumLevel.Information()
-                    .WriteTo.Console()
-                    .WriteTo.File(
-                        "Logs/log-.txt",
-                        rollingInterval: RollingInterval.Day,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                    );
-            });
+        builder.Host.UseSerilog((context, configuration) =>
+{
+    configuration
+        .MinimumLevel.Information()
+        // Code của mình giữ Information, nhưng tắt bớt log hạ tầng:
+        // SQL của EF Core và vòng đời request của ASP.NET làm chìm sự kiện bảo mật.
+        .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+        .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+        .WriteTo.Console()
+        .WriteTo.File(
+            "Logs/log-.txt",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        );
+});
 
             // Add services to the container.
 
@@ -64,6 +69,47 @@ namespace ClothingAPI
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection("FrontendSettings"));
             builder.Services.Configure<RefreshTokenSettings>(builder.Configuration.GetSection("RefreshTokenSettings"));
+
+            builder.Services.Configure<TwoFactorSettings>(builder.Configuration.GetSection("TwoFactorSettings"));
+            var twoFactorSettings = builder.Configuration.GetSection("TwoFactorSettings").Get<TwoFactorSettings>()
+                ?? new TwoFactorSettings();
+
+            if (string.IsNullOrWhiteSpace(twoFactorSettings.RecoveryCodePepper) || twoFactorSettings.RecoveryCodePepper.Length < 32)
+            {
+                throw new InvalidOperationException(
+                    "TwoFactorSettings:RecoveryCodePepper chưa được cấu hình hoặc quá ngắn (cần >= 32 ký tự). " +
+                    "Ở local dev, đặt qua User Secrets: dotnet user-secrets set \"TwoFactorSettings:RecoveryCodePepper\" \"<pepper>\". " +
+                    "Ở Docker, đặt qua biến môi trường TWO_FACTOR_RECOVERY_PEPPER trong file .env. " +
+                    "Lưu ý: đổi pepper sẽ làm mọi mã khôi phục 2FA đã phát mất hiệu lực."
+                );
+            }
+
+            builder.Services.Configure<TurnstileSettings>(builder.Configuration.GetSection("TurnstileSettings"));
+            var turnstileSettings = builder.Configuration.GetSection("TurnstileSettings").Get<TurnstileSettings>()
+                ?? new TurnstileSettings();
+
+            if (turnstileSettings.Enabled && string.IsNullOrWhiteSpace(turnstileSettings.SecretKey))
+            {
+                throw new InvalidOperationException(
+                    "TurnstileSettings:SecretKey chưa được cấu hình (CAPTCHA đang bật). " +
+                    "Ở local dev, đặt qua User Secrets: dotnet user-secrets set \"TurnstileSettings:SecretKey\" \"<secret>\". " +
+                    "Ở Docker, đặt qua biến môi trường TURNSTILE_SECRET_KEY trong file .env. " +
+                    "Chỉ khi dev/test mới tắt bằng TurnstileSettings:Enabled = false (TURNSTILE_ENABLED=false)."
+                );
+            }
+
+            // HttpClient riêng cho Cloudflare Turnstile: quá TimeoutSeconds coi như không gọi được.
+            builder.Services.AddHttpClient(TurnstileService.HttpClientName, client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(turnstileSettings.TimeoutSeconds);
+            });
+
+            // Mã hóa secret TOTP trong DB. Cố định ApplicationName để key ring không phụ thuộc đường dẫn cài đặt;
+            // thư mục key giữ mặc định (/root/.aspnet/DataProtection-Keys trong Docker, đã gắn volume dataprotection_data).
+            builder.Services.AddDataProtection().SetApplicationName("ClothingAPI");
+
+            // Nguồn thời gian dùng chung (test thay bằng đồng hồ giả để kiểm soát bước TOTP, hạn challenge).
+            builder.Services.AddSingleton(TimeProvider.System);
 
             builder.Services.AddAuthentication(options =>
             {
@@ -117,6 +163,8 @@ namespace ClothingAPI
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            builder.Services.AddScoped<ITwoFactorService, TwoFactorService>();
+            builder.Services.AddScoped<ITurnstileService, TurnstileService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IBrandService, BrandService>();
@@ -163,6 +211,14 @@ namespace ClothingAPI
             });
 
             var app = builder.Build();
+
+            if (!turnstileSettings.Enabled)
+            {
+                app.Logger.LogWarning(
+                    "CAPTCHA (Cloudflare Turnstile) đang TẮT (TurnstileSettings:Enabled = false): " +
+                    "đăng nhập và đăng ký KHÔNG được bảo vệ khỏi bot. Chỉ dùng khi dev/test.");
+            }
+
             using (var scope = app.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();

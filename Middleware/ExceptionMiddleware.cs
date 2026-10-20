@@ -31,7 +31,7 @@ namespace ClothingAPI.Middleware
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Đã xảy ra lỗi: {Message}", exception.Message);
+             
 
                 var (statusCode, message) = exception switch
                 {
@@ -46,6 +46,17 @@ namespace ClothingAPI.Middleware
                         "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau."
                     )
                 };
+                  if (statusCode == HttpStatusCode.InternalServerError)
+            {
+                   // Lỗi ngoài dự kiến: cần stack trace để điều tra.
+                  _logger.LogError(exception, "Đã xảy ra lỗi: {Message}", exception.Message);
+            }
+           else
+        {
+        // Lỗi nghiệp vụ dự kiến (sai mật khẩu, không tìm thấy...): ghi gọn, không kèm stack trace.
+        // Sự kiện bảo mật đã được ghi ở tầng service rồi.
+        _logger.LogInformation("Trả {StatusCode}: {Message}", (int)statusCode, exception.Message);
+         }
 
                 context.Response.ContentType = "application/json";
                 context.Response.StatusCode = (int)statusCode;

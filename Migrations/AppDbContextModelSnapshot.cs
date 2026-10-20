@@ -1114,6 +1114,81 @@ namespace ClothingAPI.Migrations
                     b.ToTable("Suppliers", (string)null);
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.TwoFactorChallenge", b =>
+                {
+                    b.Property<int>("TwoFactorChallengeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TwoFactorChallengeId"));
+
+                    b.Property<DateTime?>("ConsumedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TwoFactorChallengeId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("TwoFactorChallenges", (string)null);
+                });
+
+            modelBuilder.Entity("ClothingAPI.Models.TwoFactorRecoveryCode", b =>
+                {
+                    b.Property<int>("TwoFactorRecoveryCodeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TwoFactorRecoveryCodeId"));
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TwoFactorRecoveryCodeId");
+
+                    b.HasIndex("UserId", "CodeHash");
+
+                    b.ToTable("TwoFactorRecoveryCodes", (string)null);
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -1165,6 +1240,19 @@ namespace ClothingAPI.Migrations
 
                     b.Property<DateTime?>("ResetPasswordTokenExpiry")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("TwoFactorEnabledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("TwoFactorLastUsedStep")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("TwoFactorSecretProtected")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1541,6 +1629,28 @@ namespace ClothingAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.TwoFactorChallenge", b =>
+                {
+                    b.HasOne("ClothingAPI.Models.User", "User")
+                        .WithMany("TwoFactorChallenges")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ClothingAPI.Models.TwoFactorRecoveryCode", b =>
+                {
+                    b.HasOne("ClothingAPI.Models.User", "User")
+                        .WithMany("TwoFactorRecoveryCodes")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.UserRole", b =>
                 {
                     b.HasOne("ClothingAPI.Models.Role", "Role")
@@ -1678,6 +1788,10 @@ namespace ClothingAPI.Migrations
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("TwoFactorChallenges");
+
+                    b.Navigation("TwoFactorRecoveryCodes");
 
                     b.Navigation("UserRoles");
 

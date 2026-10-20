@@ -26,5 +26,9 @@ namespace ClothingAPI.DTOs.Auth
 
         [StringLength(20)]
         public string? PhoneNumber { get; set; }
+
+        // Token Cloudflare Turnstile (dùng một lần, hết hạn sau ~5 phút).
+        [Required(ErrorMessage = "Vui lòng hoàn tất xác minh CAPTCHA.")]
+        public string CaptchaToken { get; set; } = string.Empty;
     }
 }

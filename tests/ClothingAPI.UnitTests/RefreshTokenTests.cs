@@ -281,7 +281,8 @@ public class RefreshTokenTests : UnitTestBase
                 Moq.Mock.Of<Services.Interfaces.IEmailService>(),
                 Options.Create(new FrontendSettings { BaseUrl = "http://localhost:4200" }),
                 NullLogger<AuthService>.Instance,
-                NewService(holder));
+                NewService(holder),
+                Moq.Mock.Of<Services.Interfaces.ITwoFactorService>());
 
             await authService.ResetPasswordAsync(new ResetPasswordDto
             {

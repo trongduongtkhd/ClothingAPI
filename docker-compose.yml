@@ -21,7 +21,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"
+          '/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" || exit 1',
         ]
       interval: 10s
       timeout: 5s
@@ -37,6 +37,7 @@ services:
     restart: unless-stopped
 
     environment:
+      TZ: Asia/Ho_Chi_Minh
       ASPNETCORE_ENVIRONMENT: Docker
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ClothingStoreDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=True"
@@ -56,6 +57,15 @@ services:
       # Tùy chọn: Gmail + App Password để gửi mail quên mật khẩu.
       EmailSettings__SenderEmail: ${EMAIL_SENDER:-}
       EmailSettings__AppPassword: ${EMAIL_APP_PASSWORD:-}
+      # Khóa HMAC cho mã khôi phục 2FA (bắt buộc, >= 32 ký tự). Đổi giá trị này => mọi mã khôi phục đã phát mất hiệu lực.
+      TwoFactorSettings__RecoveryCodePepper: ${TWO_FACTOR_RECOVERY_PEPPER}
+      # CAPTCHA Cloudflare Turnstile cho đăng nhập/đăng ký. Bật mà thiếu secret thì API không khởi động.
+      TurnstileSettings__SecretKey: ${TURNSTILE_SECRET_KEY}
+      # Chỉ đặt false khi dev/test (mỗi lần khởi động sẽ ghi log Warning "CAPTCHA đang TẮT").
+      TurnstileSettings__Enabled: ${TURNSTILE_ENABLED:-true}
+      # CHỈ DÙNG ĐỂ KIỂM THỬ: trỏ tới địa chỉ không truy cập được (vd http://10.255.255.1/) để giả lập
+      # mất mạng ra Cloudflare (register bị chặn, login vẫn cho qua). Bình thường KHÔNG đặt biến này.
+      TurnstileSettings__VerifyUrl: ${TURNSTILE_VERIFY_URL:-https://challenges.cloudflare.com/turnstile/v0/siteverify}
 
     ports:
       - "8080:8080"
