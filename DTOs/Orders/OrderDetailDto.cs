@@ -37,4 +37,10 @@ public class OrderDetailDto
     public List<PaymentDto> Payments { get; set; } = [];
 
     public List<OrderStatusHistoryDto> StatusHistories { get; set; } = [];
+
+    public ReturnRequestDto? ReturnRequest { get; set; }
+
+    public bool CanRequestReturn { get; set; }
+
+    public DateTime? ReturnDeadline { get; set; }
 }

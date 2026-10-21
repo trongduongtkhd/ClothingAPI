@@ -47,6 +47,16 @@ namespace ClothingAPI.Data
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<TwoFactorRecoveryCode> TwoFactorRecoveryCodes { get; set; }
         public DbSet<TwoFactorChallenge> TwoFactorChallenges { get; set; }
+        public DbSet<ReturnRequest> ReturnRequests { get; set; }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+
+            configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+            configurationBuilder.Properties<DateTime?>().HaveConversion<UtcDateTimeConverter>();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -76,6 +86,7 @@ namespace ClothingAPI.Data
             ConfigurePayment(modelBuilder);
             ConfigureOrderStatusHistory(modelBuilder);
             ConfigureCouponUsage(modelBuilder);
+            ConfigureReturnRequest(modelBuilder);
 
             ConfigureReview(modelBuilder);
             ConfigureWishlistItem(modelBuilder);
@@ -1020,6 +1031,49 @@ namespace ClothingAPI.Data
                 entity.HasOne(x => x.ChangedByUser)
                     .WithMany(x => x.ChangedOrderStatusHistories)
                     .HasForeignKey(x => x.ChangedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+        }
+
+        private static void ConfigureReturnRequest(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ReturnRequest>(entity =>
+            {
+                entity.ToTable("ReturnRequests");
+
+                entity.HasKey(x => x.ReturnRequestId);
+
+                entity.HasIndex(x => x.OrderId)
+                    .IsUnique();
+
+                entity.Property(x => x.Reason)
+                    .HasMaxLength(500)
+                    .IsRequired();
+
+                entity.Property(x => x.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(30)
+                    .IsRequired();
+
+                entity.Property(x => x.AdminNote)
+                    .HasMaxLength(500);
+
+                entity.Property(x => x.CreatedAt)
+                    .HasDefaultValueSql("GETUTCDATE()");
+
+                entity.HasOne(x => x.Order)
+                    .WithOne(x => x.ReturnRequest)
+                    .HasForeignKey<ReturnRequest>(x => x.OrderId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(x => x.ProcessedByUser)
+                    .WithMany()
+                    .HasForeignKey(x => x.ProcessedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
         }

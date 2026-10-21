@@ -166,12 +166,15 @@ public class CartService : ICartService
             .ToListAsync();
 
         var itemDtos = cartItems.Select(MapCartItemDto).ToList();
+        var subtotal = itemDtos.Sum(x => x.TotalPrice);
 
         return new CartDto
         {
             Items = itemDtos,
-            Subtotal = itemDtos.Sum(x => x.TotalPrice),
-            TotalQuantity = itemDtos.Sum(x => x.Quantity)
+            Subtotal = subtotal,
+            TotalQuantity = itemDtos.Sum(x => x.Quantity),
+            ShippingFee = ShippingHelper.CalculateShippingFee(subtotal),
+            FreeShippingThreshold = ShippingHelper.FreeShippingThreshold
         };
     }
 

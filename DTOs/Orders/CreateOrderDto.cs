@@ -15,4 +15,7 @@ public class CreateOrderDto
 
     [StringLength(500)]
     public string? Note { get; set; }
+
+    // Có giá trị => "Mua ngay": chỉ đặt đúng sản phẩm này, không đụng giỏ hàng.
+    public BuyNowItemDto? BuyNowItem { get; set; }
 }

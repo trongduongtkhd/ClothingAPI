@@ -26,6 +26,7 @@ public class AdminOrderService : IAdminOrderService
         var orders = _context.Orders
             .AsNoTracking()
             .Include(x => x.User)
+            .Include(x => x.ReturnRequest)
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(query.Keyword))
@@ -49,6 +50,13 @@ public class AdminOrderService : IAdminOrderService
             orders = orders.Where(x => x.PaymentStatus == query.PaymentStatus.Value);
         }
 
+        if (query.HasPendingReturn == true)
+        {
+            orders = orders.Where(x =>
+                x.ReturnRequest != null &&
+                x.ReturnRequest.Status == ReturnRequestStatus.Pending);
+        }
+
         var totalItems = await orders.CountAsync();
 
         var orderList = await orders
@@ -69,7 +77,9 @@ public class AdminOrderService : IAdminOrderService
                 TotalAmount = x.TotalAmount,
                 OrderStatus = x.OrderStatus,
                 PaymentStatus = x.PaymentStatus,
-                CreatedAt = x.CreatedAt
+                CreatedAt = x.CreatedAt,
+                HasPendingReturn = x.ReturnRequest != null &&
+                                   x.ReturnRequest.Status == ReturnRequestStatus.Pending
             }).ToList(),
 
             Page = page,
@@ -95,6 +105,7 @@ public class AdminOrderService : IAdminOrderService
             .Include(x => x.OrderItems)
                 .ThenInclude(x => x.Variant)
             .Include(x => x.CouponUsages)
+            .Include(x => x.Payments)
             .FirstOrDefaultAsync(x => x.OrderId == orderId);
 
         if (order is null)
@@ -107,11 +118,42 @@ public class AdminOrderService : IAdminOrderService
             throw new BadRequestException($"Không thể chuyển trạng thái từ {order.OrderStatus} sang {dto.Status}.");
         }
 
+        string? defaultNote = null;
+
+        // Hoàn thành = đã giao hàng. Với COD, shipper thu tiền mặt lúc giao nên ghi nhận đã thanh toán luôn;
+        // với thanh toán online thì phải thanh toán xong mới được hoàn thành.
+        if (dto.Status == OrderStatus.Completed)
+        {
+            var payment = order.Payments.FirstOrDefault();
+
+            if (payment is not null && payment.PaymentStatus != PaymentStatus.Paid)
+            {
+                if (payment.PaymentMethod != PaymentMethod.COD)
+                {
+                    throw new BadRequestException(
+                        "Đơn thanh toán online chưa được thanh toán, không thể hoàn thành."
+                    );
+                }
+
+                MarkPaymentAsPaid(order, payment);
+                defaultNote = $"Đã giao hàng và thu tiền mặt (COD) {order.TotalAmount:N0} ₫.";
+            }
+        }
+
         if (dto.Status == OrderStatus.Cancelled)
         {
             foreach (var orderItem in order.OrderItems)
             {
                 orderItem.Variant.StockQuantity += orderItem.Quantity;
+            }
+
+            // Khách đã thanh toán trước (QR) mà đơn bị hủy thì phải hoàn tiền.
+            var payment = order.Payments.FirstOrDefault();
+
+            if (payment is not null && payment.PaymentStatus == PaymentStatus.Paid)
+            {
+                MarkPaymentAsRefunded(order, payment);
+                defaultNote = $"Đã hủy đơn và hoàn {order.TotalAmount:N0} ₫ cho khách.";
             }
 
             if (order.CouponUsages.Count > 0)
@@ -136,7 +178,9 @@ public class AdminOrderService : IAdminOrderService
         {
             OrderId = orderId,
             Status = dto.Status,
-            Note = string.IsNullOrWhiteSpace(dto.Note) ? $"Admin cập nhật trạng thái thành {dto.Status}." : dto.Note.Trim(),
+            Note = string.IsNullOrWhiteSpace(dto.Note)
+                ? defaultNote ?? $"Admin cập nhật trạng thái thành {dto.Status}."
+                : dto.Note.Trim(),
             ChangedByUserId = adminUserId,
             CreatedAt = DateTime.UtcNow
         });
@@ -166,6 +210,20 @@ public class AdminOrderService : IAdminOrderService
             );
         }
 
+        if (dto.PaymentStatus == PaymentStatus.Refunded)
+        {
+            throw new BadRequestException(
+                "Hoàn tiền được thực hiện khi duyệt yêu cầu trả hàng hoặc hủy đơn đã thanh toán."
+            );
+        }
+
+        if (order.OrderStatus == OrderStatus.Returned)
+        {
+            throw new BadRequestException(
+                "Không thể cập nhật thanh toán cho đơn hàng đã trả."
+            );
+        }
+
         var payment = order.Payments.FirstOrDefault();
 
         if (payment is null)
@@ -175,19 +233,27 @@ public class AdminOrderService : IAdminOrderService
             );
         }
 
-        payment.PaymentStatus = dto.PaymentStatus;
+        // COD chỉ thu tiền khi giao hàng: hệ thống tự ghi nhận lúc đơn Hoàn thành.
+        // Cho phép bấm tay với đơn đã Hoàn thành mà vẫn chưa thanh toán (dữ liệu cũ).
+        if (dto.PaymentStatus == PaymentStatus.Paid &&
+            payment.PaymentMethod == PaymentMethod.COD &&
+            order.OrderStatus != OrderStatus.Completed)
+        {
+            throw new BadRequestException(
+                "Đơn COD sẽ tự ghi nhận đã thanh toán khi giao hàng thành công."
+            );
+        }
 
         if (dto.PaymentStatus == PaymentStatus.Paid)
         {
-            payment.PaidAt ??= DateTime.UtcNow;
-
-            if (string.IsNullOrWhiteSpace(payment.TransactionCode))
-            {
-                payment.TransactionCode = $"{payment.PaymentMethod}-{order.OrderCode}";
-            }
+            MarkPaymentAsPaid(order, payment);
+        }
+        else
+        {
+            payment.PaymentStatus = dto.PaymentStatus;
+            order.PaymentStatus = dto.PaymentStatus;
         }
 
-        order.PaymentStatus = dto.PaymentStatus;
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -204,6 +270,143 @@ public class AdminOrderService : IAdminOrderService
         };
     }
 
+    public async Task<OrderDetailDto> ApproveReturnAsync(int adminUserId, int orderId, ProcessReturnRequestDto dto)
+    {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var order = await _context.Orders
+            .Include(x => x.OrderItems)
+                .ThenInclude(x => x.Variant)
+            .Include(x => x.Payments)
+            .Include(x => x.ReturnRequest)
+            .FirstOrDefaultAsync(x => x.OrderId == orderId);
+
+        var request = GetPendingReturnRequest(order);
+
+        foreach (var orderItem in order!.OrderItems)
+        {
+            orderItem.Variant.StockQuantity += orderItem.Quantity;
+        }
+
+        var payment = order.Payments.FirstOrDefault();
+
+        if (payment is not null)
+        {
+            MarkPaymentAsRefunded(order, payment);
+        }
+        else
+        {
+            order.PaymentStatus = PaymentStatus.Refunded;
+        }
+
+        var note = NormalizeNote(dto.Note);
+
+        request.Status = ReturnRequestStatus.Approved;
+        request.AdminNote = note;
+        request.ProcessedAt = DateTime.UtcNow;
+        request.ProcessedByUserId = adminUserId;
+
+        order.OrderStatus = OrderStatus.Returned;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        _context.OrderStatusHistories.Add(new OrderStatusHistory
+        {
+            OrderId = orderId,
+            Status = OrderStatus.Returned,
+            Note = ReturnPolicy.TrimNote(
+                $"Đã duyệt trả hàng, hoàn {order.TotalAmount:N0} ₫ cho khách." +
+                (note is null ? string.Empty : $" {note}")
+            ),
+            ChangedByUserId = adminUserId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return await GetByIdAsync(orderId);
+    }
+
+    public async Task<OrderDetailDto> RejectReturnAsync(int adminUserId, int orderId, ProcessReturnRequestDto dto)
+    {
+        var note = NormalizeNote(dto.Note);
+
+        if (note is null)
+        {
+            throw new BadRequestException("Vui lòng nhập lý do từ chối yêu cầu trả hàng.");
+        }
+
+        var order = await _context.Orders
+            .Include(x => x.ReturnRequest)
+            .FirstOrDefaultAsync(x => x.OrderId == orderId);
+
+        var request = GetPendingReturnRequest(order);
+
+        request.Status = ReturnRequestStatus.Rejected;
+        request.AdminNote = note;
+        request.ProcessedAt = DateTime.UtcNow;
+        request.ProcessedByUserId = adminUserId;
+
+        order!.UpdatedAt = DateTime.UtcNow;
+
+        _context.OrderStatusHistories.Add(new OrderStatusHistory
+        {
+            OrderId = orderId,
+            Status = order.OrderStatus,
+            Note = ReturnPolicy.TrimNote($"Từ chối yêu cầu trả hàng: {note}"),
+            ChangedByUserId = adminUserId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        await _context.SaveChangesAsync();
+
+        return await GetByIdAsync(orderId);
+    }
+
+    private static ReturnRequest GetPendingReturnRequest(Order? order)
+    {
+        if (order is null)
+        {
+            throw new NotFoundException("Không tìm thấy đơn hàng.");
+        }
+
+        if (order.ReturnRequest is null)
+        {
+            throw new BadRequestException("Đơn hàng này không có yêu cầu trả hàng.");
+        }
+
+        if (order.ReturnRequest.Status != ReturnRequestStatus.Pending)
+        {
+            throw new BadRequestException("Yêu cầu trả hàng này đã được xử lý.");
+        }
+
+        return order.ReturnRequest;
+    }
+
+    private static string? NormalizeNote(string? note)
+    {
+        return string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+    }
+
+    private static void MarkPaymentAsRefunded(Order order, Payment payment)
+    {
+        payment.PaymentStatus = PaymentStatus.Refunded;
+        order.PaymentStatus = PaymentStatus.Refunded;
+    }
+
+    private static void MarkPaymentAsPaid(Order order, Payment payment)
+    {
+        payment.PaymentStatus = PaymentStatus.Paid;
+        payment.PaidAt ??= DateTime.UtcNow;
+
+        if (string.IsNullOrWhiteSpace(payment.TransactionCode))
+        {
+            payment.TransactionCode = $"{payment.PaymentMethod}-{order.OrderCode}";
+        }
+
+        order.PaymentStatus = PaymentStatus.Paid;
+    }
+
     private async Task<Order> GetOrderWithDetailsAsync(int orderId)
     {
         var order = await _context.Orders
@@ -212,6 +415,7 @@ public class AdminOrderService : IAdminOrderService
             .Include(x => x.Payments)
             .Include(x => x.OrderStatusHistories)
                 .ThenInclude(x => x.ChangedByUser)
+            .Include(x => x.ReturnRequest)
             .FirstOrDefaultAsync(x => x.OrderId == orderId);
 
         if (order is null)
@@ -289,7 +493,11 @@ public class AdminOrderService : IAdminOrderService
                     Note = x.Note,
                     ChangedByName = x.ChangedByUser?.FullName,
                     CreatedAt = x.CreatedAt
-                }).ToList()
+                }).ToList(),
+
+            ReturnRequest = ReturnPolicy.ToDto(order.ReturnRequest),
+            CanRequestReturn = ReturnPolicy.CanRequest(order, DateTime.UtcNow),
+            ReturnDeadline = ReturnPolicy.GetDeadline(order)
         };
     }
 }

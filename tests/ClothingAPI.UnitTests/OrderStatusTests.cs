@@ -234,8 +234,8 @@ public class OrderStatusTests : UnitTestBase
     public async Task UT043_ThanhToan_ChuaSangDa_GhiThoiDiemVaMaGiaoDich()
     {
         var (variantId, _) = Db.AddVariant(stock: 10);
-        var (orderId, orderCode) = Db.AddOrder(Db.CustomerId, OrderStatus.Confirmed, PaymentStatus.Unpaid, items: [(variantId, 1)]);
-        Step1($"Đơn {orderCode} (COD) PaymentStatus = Unpaid, PaidAt = null, TransactionCode = null; admin cập nhật sang Paid");
+        var (orderId, orderCode) = Db.AddOrder(Db.CustomerId, OrderStatus.Completed, PaymentStatus.Unpaid, items: [(variantId, 1)]);
+        Step1($"Đơn {orderCode} (COD) đã Completed nhưng PaymentStatus = Unpaid, PaidAt = null, TransactionCode = null (dữ liệu cũ); admin cập nhật sang Paid");
 
         var error = await ChangePaymentAsync(orderId, PaymentStatus.Paid);
 
@@ -261,5 +261,56 @@ public class OrderStatusTests : UnitTestBase
 
         Assert.IsType<BadRequestException>(error);
         Assert.Equal("Không thể cập nhật thanh toán cho đơn hàng đã hủy.", error!.Message);
+    }
+
+    [Fact]
+    public async Task UT045_HoanThanh_DonCOD_TuGhiNhanDaThanhToan()
+    {
+        var orderId = NewOrder(OrderStatus.Shipping, PaymentStatus.Unpaid);
+        Step1("Đơn COD ở trạng thái Shipping (Đang giao), PaymentStatus = Unpaid; admin chuyển sang Completed (Hoàn thành)");
+
+        var error = await ChangeStatusAsync(orderId, OrderStatus.Completed);
+
+        var payment = Db.Query(db => db.Payments.Single(p => p.OrderId == orderId));
+        var orderPayment = Db.Query(db => db.Orders.Single(o => o.OrderId == orderId).PaymentStatus);
+        var note = Db.Query(db => db.OrderStatusHistories.Single(h => h.OrderId == orderId).Note);
+        Actual($"{Describe(error)}; trạng thái = {StatusOf(orderId)}; PaymentStatus = {payment.PaymentStatus} (đơn: {orderPayment}); PaidAt = {payment.PaidAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "null"}; ghi chú = {note}");
+
+        Assert.Null(error);
+        Assert.Equal(OrderStatus.Completed, StatusOf(orderId));
+        Assert.Equal(PaymentStatus.Paid, payment.PaymentStatus);
+        Assert.Equal(PaymentStatus.Paid, orderPayment);
+        Assert.NotNull(payment.PaidAt);
+        Assert.StartsWith("Đã giao hàng và thu tiền mặt (COD)", note);
+    }
+
+    [Fact]
+    public async Task UT046_ThanhToan_DonCODChuaGiao_BiTuChoi()
+    {
+        var orderId = NewOrder(OrderStatus.Confirmed, PaymentStatus.Unpaid);
+        Step1("Đơn COD ở trạng thái Confirmed (Đã xác nhận), PaymentStatus = Unpaid; admin bấm tay sang Paid");
+
+        var error = await ChangePaymentAsync(orderId, PaymentStatus.Paid);
+        var payment = Db.Query(db => db.Orders.Single(o => o.OrderId == orderId).PaymentStatus);
+        Actual($"{Describe(error)}; PaymentStatus giữ = {payment}");
+
+        Assert.IsType<BadRequestException>(error);
+        Assert.Equal("Đơn COD sẽ tự ghi nhận đã thanh toán khi giao hàng thành công.", error!.Message);
+        Assert.Equal(PaymentStatus.Unpaid, payment);
+    }
+
+    [Fact]
+    public async Task UT047_HoanThanh_DonQRChuaThanhToan_BiTuChoi()
+    {
+        var (variantId, _) = Db.AddVariant(stock: 10);
+        var (orderId, _) = Db.AddOrder(Db.CustomerId, OrderStatus.Shipping, PaymentStatus.Unpaid, items: [(variantId, 1)], paymentMethod: PaymentMethod.MockQR);
+        Step1("Đơn thanh toán QR ở trạng thái Shipping (Đang giao), PaymentStatus = Unpaid; admin chuyển sang Completed");
+
+        var error = await ChangeStatusAsync(orderId, OrderStatus.Completed);
+        Actual($"{Describe(error)}; trạng thái giữ = {StatusOf(orderId)}");
+
+        Assert.IsType<BadRequestException>(error);
+        Assert.Equal("Đơn thanh toán online chưa được thanh toán, không thể hoàn thành.", error!.Message);
+        Assert.Equal(OrderStatus.Shipping, StatusOf(orderId));
     }
 }

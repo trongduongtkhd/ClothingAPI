@@ -314,7 +314,7 @@ namespace ClothingAPI.Services.Implementations
 
             do
             {
-                purchaseOrderCode = $"PN{DateTime.UtcNow:yyyyMMddHHmmssfff}{Random.Shared.Next(100, 1000)}";
+                purchaseOrderCode = $"PN{VietnamTime.Now:yyyyMMddHHmmssfff}{Random.Shared.Next(100, 1000)}";
             }
             while (await _context.PurchaseOrders.AnyAsync(x => x.PurchaseOrderCode == purchaseOrderCode));
 

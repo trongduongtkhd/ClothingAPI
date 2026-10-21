@@ -21,5 +21,7 @@ namespace ClothingAPI.DTOs.Orders
         public PaymentStatus PaymentStatus { get; set; }
 
         public DateTime CreatedAt { get; set; }
+
+        public bool HasPendingReturn { get; set; }
     }
 }

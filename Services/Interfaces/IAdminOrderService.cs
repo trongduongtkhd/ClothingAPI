@@ -13,5 +13,9 @@ namespace ClothingAPI.Services.Interfaces
 
         Task<PaymentDto> UpdatePaymentStatusAsync(int adminUserId, int orderId, UpdatePaymentStatusDto dto);
 
+        Task<OrderDetailDto> ApproveReturnAsync(int adminUserId, int orderId, ProcessReturnRequestDto dto);
+
+        Task<OrderDetailDto> RejectReturnAsync(int adminUserId, int orderId, ProcessReturnRequestDto dto);
+
     }
 }

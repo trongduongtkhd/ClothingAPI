@@ -72,4 +72,32 @@ public class AdminOrdersController : ControllerBase
             result
         ));
     }
+
+    [HttpPut("{orderId:int}/return-request/approve")]
+    public async Task<ActionResult<ApiResponse<OrderDetailDto>>> ApproveReturn(int orderId, [FromBody] ProcessReturnRequestDto dto)
+    {
+        var adminUserId = User.GetUserId();
+
+        var result = await _adminOrderService.ApproveReturnAsync(adminUserId, orderId, dto);
+
+        return Ok(new ApiResponse<OrderDetailDto>(
+            true,
+            "Đã duyệt trả hàng và hoàn tiền cho khách.",
+            result
+        ));
+    }
+
+    [HttpPut("{orderId:int}/return-request/reject")]
+    public async Task<ActionResult<ApiResponse<OrderDetailDto>>> RejectReturn(int orderId, [FromBody] ProcessReturnRequestDto dto)
+    {
+        var adminUserId = User.GetUserId();
+
+        var result = await _adminOrderService.RejectReturnAsync(adminUserId, orderId, dto);
+
+        return Ok(new ApiResponse<OrderDetailDto>(
+            true,
+            "Đã từ chối yêu cầu trả hàng.",
+            result
+        ));
+    }
 }

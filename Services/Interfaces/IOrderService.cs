@@ -8,6 +8,8 @@ namespace ClothingAPI.Services.Interfaces
         Task<OrderDetailDto> CreateAsync(int userId, CreateOrderDto dto);
         Task<PagedResult<OrderSummaryDto>> GetMyOrdersAsync(int userId, OrderQueryDto query);
         Task<OrderDetailDto> GetMyOrderByIdAsync(int userId, int orderId);
+
+        Task<OrderDetailDto> CreateReturnRequestAsync(int userId, int orderId, CreateReturnRequestDto dto);
         Task CancelAsync(int userId, int orderId, CancelOrderDto dto);
         Task<MockQrDto> GetMockQrAsync(int userId, int orderId);
 

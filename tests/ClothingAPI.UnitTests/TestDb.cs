@@ -202,7 +202,8 @@ public sealed class TestDb : IDisposable
         PaymentStatus paymentStatus = PaymentStatus.Unpaid,
         (int VariantId, int Quantity)[]? items = null,
         int? couponId = null,
-        decimal discount = 0)
+        decimal discount = 0,
+        PaymentMethod paymentMethod = PaymentMethod.COD)
     {
         using var db = NewContext();
         var order = new Order
@@ -242,7 +243,7 @@ public sealed class TestDb : IDisposable
         order.TotalAmount = subtotal - discount;
         order.Payments.Add(new Payment
         {
-            PaymentMethod = PaymentMethod.COD,
+            PaymentMethod = paymentMethod,
             Amount = order.TotalAmount,
             PaymentStatus = paymentStatus,
             PaidAt = paymentStatus == PaymentStatus.Paid ? DateTime.UtcNow : null,

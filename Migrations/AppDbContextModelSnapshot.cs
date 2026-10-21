@@ -949,6 +949,57 @@ namespace ClothingAPI.Migrations
                     b.ToTable("RefreshTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.ReturnRequest", b =>
+                {
+                    b.Property<int>("ReturnRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReturnRequestId"));
+
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ProcessedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ReturnRequestId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.HasIndex("ProcessedByUserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ReturnRequests", (string)null);
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
                 {
                     b.Property<int>("ReviewId")
@@ -1603,6 +1654,32 @@ namespace ClothingAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.ReturnRequest", b =>
+                {
+                    b.HasOne("ClothingAPI.Models.Order", "Order")
+                        .WithOne("ReturnRequest")
+                        .HasForeignKey("ClothingAPI.Models.ReturnRequest", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ClothingAPI.Models.User", "ProcessedByUser")
+                        .WithMany()
+                        .HasForeignKey("ProcessedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ClothingAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("ProcessedByUser");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Review", b =>
                 {
                     b.HasOne("ClothingAPI.Models.OrderItem", "OrderItem")
@@ -1724,6 +1801,8 @@ namespace ClothingAPI.Migrations
                     b.Navigation("OrderStatusHistories");
 
                     b.Navigation("Payments");
+
+                    b.Navigation("ReturnRequest");
                 });
 
             modelBuilder.Entity("ClothingAPI.Models.OrderItem", b =>

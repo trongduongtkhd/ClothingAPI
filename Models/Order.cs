@@ -41,6 +41,7 @@ public class Order
     public User User { get; set; } = null!;
 
     public Coupon? Coupon { get; set; }
+    public ReturnRequest? ReturnRequest { get; set; }
 
     public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 

@@ -12,9 +12,6 @@ namespace ClothingAPI.Services.Implementations;
 
 public class OrderService : IOrderService
 {
-    private const decimal StandardShippingFee = 30000m;
-    private const decimal FreeShippingThreshold = 500000m;
-
     private readonly AppDbContext _context;
     private readonly ICouponService _couponService;
 
@@ -38,27 +35,49 @@ public class OrderService : IOrderService
             throw new NotFoundException("Không tìm thấy địa chỉ giao hàng.");
         }
 
-        var cartItems = await _context.CartItems
-            .Include(x => x.Variant)
-                .ThenInclude(x => x.Product)
-            .Include(x => x.Variant)
-                .ThenInclude(x => x.Color)
-            .Include(x => x.Variant)
-                .ThenInclude(x => x.Size)
-            .Where(x => x.UserId == userId)
-            .ToListAsync();
+        // "Mua ngay": chỉ đặt sản phẩm được chọn, giỏ hàng giữ nguyên.
+        var cartItems = new List<CartItem>();
+        List<(ProductVariant Variant, int Quantity)> lines;
 
-        if (cartItems.Count == 0)
+        if (dto.BuyNowItem is not null)
         {
-            throw new BadRequestException("Giỏ hàng đang trống.");
+            var buyNowVariant = await _context.ProductVariants
+                .Include(x => x.Product)
+                .Include(x => x.Color)
+                .Include(x => x.Size)
+                .FirstOrDefaultAsync(x => x.VariantId == dto.BuyNowItem.VariantId);
+
+            if (buyNowVariant is null)
+            {
+                throw new BadRequestException("Sản phẩm không tồn tại.");
+            }
+
+            lines = new() { (buyNowVariant, dto.BuyNowItem.Quantity) };
+        }
+        else
+        {
+            cartItems = await _context.CartItems
+                .Include(x => x.Variant)
+                    .ThenInclude(x => x.Product)
+                .Include(x => x.Variant)
+                    .ThenInclude(x => x.Color)
+                .Include(x => x.Variant)
+                    .ThenInclude(x => x.Size)
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+
+            if (cartItems.Count == 0)
+            {
+                throw new BadRequestException("Giỏ hàng đang trống.");
+            }
+
+            lines = cartItems.Select(x => (x.Variant, x.Quantity)).ToList();
         }
 
         decimal subtotal = 0;
 
-        foreach (var cartItem in cartItems)
+        foreach (var (variant, quantity) in lines)
         {
-            var variant = cartItem.Variant;
-
             if (!variant.IsActive || !variant.Product.IsActive)
             {
                 throw new BadRequestException(
@@ -66,7 +85,7 @@ public class OrderService : IOrderService
                 );
             }
 
-            if (variant.StockQuantity < cartItem.Quantity)
+            if (variant.StockQuantity < quantity)
             {
                 throw new BadRequestException(
                     $"Sản phẩm '{variant.Product.ProductName}' không đủ tồn kho."
@@ -75,7 +94,7 @@ public class OrderService : IOrderService
 
             var unitPrice = PriceHelper.GetUnitPrice(variant);
 
-            subtotal += unitPrice * cartItem.Quantity;
+            subtotal += unitPrice * quantity;
         }
 
         CouponValidationDto? couponValidation = null;
@@ -87,7 +106,8 @@ public class OrderService : IOrderService
                 userId,
                 new ValidateCouponDto
                 {
-                    Code = dto.CouponCode
+                    Code = dto.CouponCode,
+                    BuyNowItem = dto.BuyNowItem
                 }
             );
 
@@ -103,7 +123,7 @@ public class OrderService : IOrderService
             }
         }
 
-        var shippingFee = CalculateShippingFee(subtotal);
+        var shippingFee = ShippingHelper.CalculateShippingFee(subtotal);
         var discountAmount = couponValidation?.DiscountAmount ?? 0m;
         var totalAmount = subtotal - discountAmount + shippingFee;
 
@@ -126,9 +146,8 @@ public class OrderService : IOrderService
             CreatedAt = DateTime.UtcNow
         };
 
-        foreach (var cartItem in cartItems)
+        foreach (var (variant, quantity) in lines)
         {
-            var variant = cartItem.Variant;
             var unitPrice = PriceHelper.GetUnitPrice(variant);
 
             order.OrderItems.Add(new OrderItem
@@ -141,11 +160,11 @@ public class OrderService : IOrderService
                 UnitPrice = unitPrice,
                 // Chốt giá vốn tại thời điểm bán để tính lợi nhuận về sau.
                 UnitCost = variant.AverageCostPrice ?? 0m,
-                Quantity = cartItem.Quantity,
-                TotalPrice = unitPrice * cartItem.Quantity
+                Quantity = quantity,
+                TotalPrice = unitPrice * quantity
             });
 
-            variant.StockQuantity -= cartItem.Quantity;
+            variant.StockQuantity -= quantity;
         }
 
         order.Payments.Add(new Payment
@@ -322,6 +341,7 @@ public class OrderService : IOrderService
             .Include(x => x.Payments)
             .Include(x => x.OrderStatusHistories)
                 .ThenInclude(x => x.ChangedByUser)
+            .Include(x => x.ReturnRequest)
             .FirstOrDefaultAsync(x => x.OrderId == orderId);
 
         if (order is null)
@@ -332,22 +352,85 @@ public class OrderService : IOrderService
         return order;
     }
 
+    public async Task<OrderDetailDto> CreateReturnRequestAsync(int userId, int orderId, CreateReturnRequestDto dto)
+    {
+        var order = await _context.Orders
+            .Include(x => x.OrderStatusHistories)
+            .Include(x => x.ReturnRequest)
+            .FirstOrDefaultAsync(x =>
+                x.OrderId == orderId &&
+                x.UserId == userId);
+
+        if (order is null)
+        {
+            throw new NotFoundException("Không tìm thấy đơn hàng.");
+        }
+
+        if (order.ReturnRequest is not null)
+        {
+            throw new BadRequestException("Đơn hàng này đã có yêu cầu trả hàng.");
+        }
+
+        if (order.OrderStatus != OrderStatus.Completed)
+        {
+            throw new BadRequestException("Chỉ có thể yêu cầu trả hàng với đơn đã hoàn thành.");
+        }
+
+        if (order.PaymentStatus != PaymentStatus.Paid)
+        {
+            throw new BadRequestException("Chỉ có thể yêu cầu trả hàng với đơn đã thanh toán.");
+        }
+
+        if (!ReturnPolicy.CanRequest(order, DateTime.UtcNow))
+        {
+            throw new BadRequestException(
+                $"Đã quá thời hạn {ReturnPolicy.WindowDays} ngày để yêu cầu trả hàng."
+            );
+        }
+
+        var reason = dto.Reason.Trim();
+
+        if (reason.Length < 10)
+        {
+            throw new BadRequestException("Lý do trả hàng phải từ 10 đến 500 ký tự.");
+        }
+
+        _context.ReturnRequests.Add(new ReturnRequest
+        {
+            OrderId = order.OrderId,
+            UserId = userId,
+            Reason = reason,
+            Status = ReturnRequestStatus.Pending,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        _context.OrderStatusHistories.Add(new OrderStatusHistory
+        {
+            OrderId = order.OrderId,
+            Status = order.OrderStatus,
+            Note = ReturnPolicy.TrimNote($"Khách yêu cầu trả hàng: {reason}"),
+            ChangedByUserId = userId,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        order.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return await GetMyOrderByIdAsync(userId, orderId);
+    }
+
     private async Task<string> GenerateOrderCodeAsync()
     {
         string orderCode;
 
         do
         {
-            orderCode = $"DH{DateTime.UtcNow:yyyyMMddHHmmssfff}{Random.Shared.Next(100, 1000)}";
+            orderCode = $"DH{VietnamTime.Now:yyyyMMddHHmmssfff}{Random.Shared.Next(100, 1000)}";
 
         }
         while (await _context.Orders.AnyAsync(x => x.OrderCode == orderCode));
         return orderCode;
-    }
-
-    private static decimal CalculateShippingFee(decimal subtotal)
-    {
-        return subtotal >= FreeShippingThreshold ? 0m : StandardShippingFee;
     }
 
     private static string BuildShippingAddress(Address address)
@@ -421,7 +504,11 @@ public class OrderService : IOrderService
                     Note = x.Note,
                     ChangedByName = x.ChangedByUser?.FullName,
                     CreatedAt = x.CreatedAt
-                }).ToList()
+                }).ToList(),
+
+            ReturnRequest = ReturnPolicy.ToDto(order.ReturnRequest),
+            CanRequestReturn = ReturnPolicy.CanRequest(order, DateTime.UtcNow),
+            ReturnDeadline = ReturnPolicy.GetDeadline(order)
         };
     }
     public async Task<MockQrDto> GetMockQrAsync(int userId, int orderId)

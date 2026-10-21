@@ -74,6 +74,20 @@ public class OrdersController : ControllerBase
         ));
     }
 
+    [HttpPost("{orderId:int}/return-request")]
+    public async Task<ActionResult<ApiResponse<OrderDetailDto>>> CreateReturnRequest(int orderId, [FromBody] CreateReturnRequestDto dto)
+    {
+        var userId = User.GetUserId();
+
+        var result = await _orderService.CreateReturnRequestAsync(userId, orderId, dto);
+
+        return Ok(new ApiResponse<OrderDetailDto>(
+            true,
+            "Đã gửi yêu cầu trả hàng. Shop sẽ phản hồi sớm.",
+            result
+        ));
+    }
+
     [HttpGet("{orderId:int}/mock-qr")]
     public async Task<ActionResult<ApiResponse<MockQrDto>>> GetMockQr(int orderId)
     {

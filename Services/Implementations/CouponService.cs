@@ -224,16 +224,37 @@ public class CouponService : ICouponService
             }
         }
 
-        var cartItems = await _context.CartItems
-            .AsNoTracking()
-            .Include(x => x.Variant)
-                .ThenInclude(x => x.Product)
-            .Where(x => x.UserId == userId)
-            .ToListAsync();
+        List<(ProductVariant Variant, int Quantity)> lines;
 
-        if (cartItems.Count == 0)
+        if (dto.BuyNowItem is not null)
         {
-            throw new BadRequestException("Giỏ hàng đang trống.");
+            var buyNowVariant = await _context.ProductVariants
+                .AsNoTracking()
+                .Include(x => x.Product)
+                .FirstOrDefaultAsync(x => x.VariantId == dto.BuyNowItem.VariantId);
+
+            if (buyNowVariant is null)
+            {
+                throw new BadRequestException("Sản phẩm không tồn tại.");
+            }
+
+            lines = new() { (buyNowVariant, dto.BuyNowItem.Quantity) };
+        }
+        else
+        {
+            var cartItems = await _context.CartItems
+                .AsNoTracking()
+                .Include(x => x.Variant)
+                    .ThenInclude(x => x.Product)
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+
+            if (cartItems.Count == 0)
+            {
+                throw new BadRequestException("Giỏ hàng đang trống.");
+            }
+
+            lines = cartItems.Select(x => (x.Variant, x.Quantity)).ToList();
         }
 
         var categoryIds = coupon.CouponCategories.Select(x => x.CategoryId).ToHashSet();
@@ -245,17 +266,17 @@ public class CouponService : ICouponService
         decimal subtotal = 0;
         decimal eligibleSubtotal = 0;
 
-        foreach (var cartItem in cartItems)
+        foreach (var (variant, quantity) in lines)
         {
-            var unitPrice = PriceHelper.GetUnitPrice(cartItem.Variant);
+            var unitPrice = PriceHelper.GetUnitPrice(variant);
 
-            var itemTotal = unitPrice * cartItem.Quantity;
+            var itemTotal = unitPrice * quantity;
 
             subtotal += itemTotal;
 
-            var isEligible = !hasTargetRestriction || productIds.Contains(cartItem.Variant.ProductId) ||
+            var isEligible = !hasTargetRestriction || productIds.Contains(variant.ProductId) ||
 
-                             categoryIds.Contains(cartItem.Variant.Product.CategoryId);
+                             categoryIds.Contains(variant.Product.CategoryId);
 
             if (isEligible)
             {

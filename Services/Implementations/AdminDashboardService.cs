@@ -2,6 +2,7 @@
 using ClothingAPI.DTOs.Dashboard;
 using ClothingAPI.Enums;
 using ClothingAPI.Exceptions;
+using ClothingAPI.Helpers;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,14 +32,17 @@ public class AdminDashboardService : IAdminDashboardService
             .Include(x => x.User)
             .AsQueryable();
 
+        // FromDate/ToDate là ngày lịch theo giờ VN; CreatedAt lưu UTC.
         if (query.FromDate.HasValue)
         {
-            orders = orders.Where(x => x.CreatedAt >= query.FromDate.Value);
+            var startDate = VietnamTime.StartOfDayUtc(query.FromDate.Value);
+
+            orders = orders.Where(x => x.CreatedAt >= startDate);
         }
 
         if (query.ToDate.HasValue)
         {
-            var endDateExclusive = query.ToDate.Value.Date.AddDays(1);
+            var endDateExclusive = VietnamTime.StartOfDayUtc(query.ToDate.Value).AddDays(1);
 
             orders = orders.Where(x => x.CreatedAt < endDateExclusive);
 
