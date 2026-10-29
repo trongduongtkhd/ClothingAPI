@@ -6,6 +6,7 @@ namespace ClothingAPI.Services.Interfaces
     public interface IOrderService
     {
         Task<OrderDetailDto> CreateAsync(int userId, CreateOrderDto dto);
+        Task<OrderDetailDto> GetMyOrderByRequestIdAsync(int userId, Guid requestId);
         Task<PagedResult<OrderSummaryDto>> GetMyOrdersAsync(int userId, OrderQueryDto query);
         Task<OrderDetailDto> GetMyOrderByIdAsync(int userId, int orderId);
 

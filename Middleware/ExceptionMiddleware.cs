@@ -36,6 +36,7 @@ namespace ClothingAPI.Middleware
                 var (statusCode, message) = exception switch
                 {
                     BadRequestException => (HttpStatusCode.BadRequest, exception.Message),
+                    ConflictException => (HttpStatusCode.Conflict, exception.Message),
                     
                     UnauthorizedException => (HttpStatusCode.Unauthorized, exception.Message),
                     

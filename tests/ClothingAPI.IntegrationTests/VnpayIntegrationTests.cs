@@ -44,7 +44,7 @@ public class VnpayIntegrationTests
         int variantId;
         await using (var db = factory.CreateDbContext()) variantId = await db.ProductVariants.Where(x => x.IsActive && x.StockQuantity > 0).Select(x => x.VariantId).FirstAsync();
         await TestHelpers.AddToCartAsync(client,variantId,1);
-        var orderResponse = await client.PostAsJsonAsync("/api/orders",new { addressId = address, paymentMethod = "VnPay" });
+        var orderResponse = await client.PostAsJsonAsync("/api/orders",new { requestId = Guid.NewGuid(), addressId = address, paymentMethod = "VnPay" });
         var orderJson = await TestHelpers.ReadJsonAsync(orderResponse);
         Assert.Equal(HttpStatusCode.Created,orderResponse.StatusCode);
         var order = orderJson.GetProperty("data");

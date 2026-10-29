@@ -47,6 +47,13 @@ public class OrdersController : ControllerBase
         ));
     }
 
+    [HttpGet("by-request/{requestId:guid}")]
+    public async Task<ActionResult<ApiResponse<OrderDetailDto>>> GetByRequestId(Guid requestId)
+    {
+        var result = await _orderService.GetMyOrderByRequestIdAsync(User.GetUserId(), requestId);
+        return Ok(new ApiResponse<OrderDetailDto>(true, "Lấy đơn hàng thành công.", result));
+    }
+
     [HttpGet("{orderId:int}")]
     public async Task<ActionResult<ApiResponse<OrderDetailDto>>> GetById(int orderId)
     {

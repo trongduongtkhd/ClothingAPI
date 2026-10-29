@@ -26,6 +26,7 @@ public class OrderPricingTests : UnitTestBase
         OrderDetailDto? order = null;
         var error = await CaptureAsync(async () => order = await service.CreateAsync(Db.CustomerId, new CreateOrderDto
         {
+            RequestId = Guid.NewGuid(),
             AddressId = addressId,
             PaymentMethod = PaymentMethod.COD,
             CouponCode = couponCode

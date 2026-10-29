@@ -49,6 +49,17 @@ public class StockCostTests : UnitTestBase
     }
 
     [Fact]
+    public async Task PurchaseAmountExceedsDatabasePrecision_IsRejectedWithoutChangingStock()
+    {
+        var (variantId, _) = Db.AddVariant(stock: 10, averageCost: 100000);
+        var error = await CreateAsync(variantId, 2, 5000000000000000m);
+        Assert.IsType<BadRequestException>(error);
+        Assert.Equal("Tổng tiền phiếu nhập vượt giới hạn.", error!.Message);
+        Assert.Equal((10, (decimal?)100000m), VariantState(variantId));
+        Assert.Equal(0, Db.Query(db => db.PurchaseOrders.Count()));
+    }
+
+    [Fact]
     public async Task UT045_GiaVon_NhapTheoViDuSRS_120000()
     {
         var (variantId, _) = Db.AddVariant(stock: 10, averageCost: 100000);

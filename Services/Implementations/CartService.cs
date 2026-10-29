@@ -25,6 +25,8 @@ public class CartService : ICartService
     public async Task<CartDto> AddItemAsync(int userId, AddCartItemDto dto)
     {
         EnsureValidQuantity(dto.Quantity);
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await TransactionLock.AcquireAsync(_context, $"cart-{userId}");
 
         var variant = await _context.ProductVariants
             .Include(x => x.Product)
@@ -79,6 +81,7 @@ public class CartService : ICartService
         }
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return await BuildCartAsync(userId);
     }
@@ -86,6 +89,8 @@ public class CartService : ICartService
     public async Task<CartDto> UpdateItemAsync(int userId, int cartItemId, UpdateCartItemDto dto)
     {
         EnsureValidQuantity(dto.Quantity);
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await TransactionLock.AcquireAsync(_context, $"cart-{userId}");
 
         var cartItem = await _context.CartItems
             .Include(x => x.Variant)
@@ -115,12 +120,15 @@ public class CartService : ICartService
         cartItem.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return await BuildCartAsync(userId);
     }
 
     public async Task DeleteItemAsync(int userId, int cartItemId)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await TransactionLock.AcquireAsync(_context, $"cart-{userId}");
         var cartItem = await _context.CartItems
             .FirstOrDefaultAsync(x =>
                 x.CartItemId == cartItemId &&
@@ -133,10 +141,13 @@ public class CartService : ICartService
 
         _context.CartItems.Remove(cartItem);
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
     public async Task ClearCartAsync(int userId)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await TransactionLock.AcquireAsync(_context, $"cart-{userId}");
         var cartItems = await _context.CartItems
             .Where(x => x.UserId == userId)
             .ToListAsync();
@@ -148,6 +159,7 @@ public class CartService : ICartService
 
         _context.CartItems.RemoveRange(cartItems);
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
     }
 
     private async Task<CartDto> BuildCartAsync(int userId)

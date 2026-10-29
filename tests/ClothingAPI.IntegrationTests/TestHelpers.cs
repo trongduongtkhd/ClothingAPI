@@ -127,6 +127,7 @@ public static class TestHelpers
     public static Task<HttpResponseMessage> PostOrderAsync(HttpClient client, int addressId, string? couponCode, string note = "Integration test") =>
         client.PostAsJsonAsync("/api/orders", new
         {
+            requestId = Guid.NewGuid(),
             addressId,
             paymentMethod = "COD",
             note,

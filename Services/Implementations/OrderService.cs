@@ -8,6 +8,9 @@ using ClothingAPI.Models;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 
 namespace ClothingAPI.Services.Implementations;
 
@@ -26,13 +29,32 @@ public class OrderService : IOrderService
 
     public async Task<OrderDetailDto> CreateAsync(int userId, CreateOrderDto dto)
     {
+        if (!dto.RequestId.HasValue || dto.RequestId.Value == Guid.Empty)
+            throw new BadRequestException("Mã yêu cầu đặt hàng không hợp lệ.");
+        var requestHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new
+        {
+            dto.AddressId, dto.PaymentMethod,
+            CouponCode = dto.CouponCode?.Trim().ToUpperInvariant() ?? "",
+            Note = NormalizeNullableText(dto.Note), dto.BuyNowItem
+        }))));
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await TransactionLock.AcquireAsync(_context, $"checkout-{userId}-{dto.RequestId.Value:N}");
+        var existing = await _context.Orders.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == userId && x.RequestId == dto.RequestId);
+        if (existing is not null)
+        {
+            if (existing.RequestHash != requestHash)
+                throw new ConflictException("Mã yêu cầu đã được dùng cho nội dung khác. Vui lòng kiểm tra đơn hàng trước đó.");
+            await transaction.CommitAsync();
+            return await GetMyOrderByIdAsync(userId, existing.OrderId);
+        }
+        if (dto.BuyNowItem is null)
+            await TransactionLock.AcquireAsync(_context, $"cart-{userId}");
+
         if (!Enum.IsDefined(dto.PaymentMethod))
             throw new BadRequestException("Phương thức thanh toán không hợp lệ.");
         if (dto.PaymentMethod == PaymentMethod.VnPay && !_vnpay.IsConfigured)
             throw new BadRequestException("VNPAY Sandbox chưa được cấu hình.");
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-
-
         var address = await _context.Addresses
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.AddressId == dto.AddressId && x.UserId == userId);
@@ -85,6 +107,9 @@ public class OrderService : IOrderService
 
         foreach (var (variant, quantity) in lines)
         {
+            if (quantity is < 1 or > 100)
+                throw new BadRequestException("Số lượng phải từ 1 đến 100.");
+
             if (!variant.IsActive || !variant.Product.IsActive)
             {
                 throw new BadRequestException(
@@ -109,6 +134,11 @@ public class OrderService : IOrderService
 
         if (!string.IsNullOrWhiteSpace(dto.CouponCode))
         {
+            var code = dto.CouponCode.Trim().ToUpperInvariant();
+            var couponId = await _context.Coupons.Where(x => x.Code == code)
+                .Select(x => (int?)x.CouponId).SingleOrDefaultAsync();
+            if (couponId.HasValue) await CouponUsageCounter.LockAsync(_context, couponId.Value);
+
             couponValidation = await _couponService.ValidateForCartAsync(
                 userId,
                 new ValidateCouponDto
@@ -135,8 +165,43 @@ public class OrderService : IOrderService
         var totalAmount = subtotal - discountAmount + shippingFee;
         if (dto.PaymentMethod == PaymentMethod.VnPay) VnpayProtocol.Amount(totalAmount);
 
+        // Reserve against the current database value, not the earlier entity snapshot.
+        // The transaction rolls every reservation back if any line or order save fails.
+        // Use a stable lock order for carts containing several variants.
+        foreach (var (variant, quantity) in lines.OrderBy(x => x.Variant.VariantId))
+        {
+            var affected = await _context.ProductVariants
+                .Where(x => x.VariantId == variant.VariantId
+                    && x.StockQuantity >= quantity
+                    && x.IsActive && x.Product.IsActive)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(
+                    x => x.StockQuantity, x => x.StockQuantity - quantity));
+
+            if (affected != 1)
+                throw new BadRequestException(
+                    $"Sản phẩm '{variant.Product.ProductName}' không đủ tồn kho hoặc không còn được bán.");
+
+            // A purchase receipt may have changed average cost while this reservation
+            // waited. Stamp the cost at the actual reservation, preserving sale prices.
+            // ExecuteUpdate bypasses tracking, so synchronize the original values too.
+            var reserved = await _context.ProductVariants
+                .Where(x => x.VariantId == variant.VariantId)
+                .Select(x => new { x.StockQuantity, x.AverageCostPrice })
+                .SingleAsync();
+            var stock = _context.Entry(variant).Property(x => x.StockQuantity);
+            stock.CurrentValue = reserved.StockQuantity;
+            stock.OriginalValue = reserved.StockQuantity;
+            stock.IsModified = false;
+            var cost = _context.Entry(variant).Property(x => x.AverageCostPrice);
+            cost.CurrentValue = reserved.AverageCostPrice;
+            cost.OriginalValue = reserved.AverageCostPrice;
+            cost.IsModified = false;
+        }
+
         var order = new Order
         {
+            RequestId = dto.RequestId,
+            RequestHash = requestHash,
             OrderCode = await GenerateOrderCodeAsync(),
             UserId = userId,
             ReceiverName = address.ReceiverName,
@@ -171,8 +236,6 @@ public class OrderService : IOrderService
                 Quantity = quantity,
                 TotalPrice = unitPrice * quantity
             });
-
-            variant.StockQuantity -= quantity;
         }
 
         order.Payments.Add(new Payment
@@ -195,7 +258,7 @@ public class OrderService : IOrderService
 
         if (coupon is not null)
         {
-            coupon.UsedCount += 1;
+            await CouponUsageCounter.IncrementAsync(_context, coupon.CouponId);
 
             order.CouponUsages.Add(new CouponUsage
             {
@@ -212,6 +275,15 @@ public class OrderService : IOrderService
         await transaction.CommitAsync();
 
         return await GetMyOrderByIdAsync(userId, order.OrderId);
+    }
+
+    public async Task<OrderDetailDto> GetMyOrderByRequestIdAsync(int userId, Guid requestId)
+    {
+        var orderId = await _context.Orders.AsNoTracking()
+            .Where(x => x.UserId == userId && x.RequestId == requestId)
+            .Select(x => (int?)x.OrderId).SingleOrDefaultAsync();
+        if (!orderId.HasValue) throw new NotFoundException("Chưa tìm thấy đơn hàng của yêu cầu này.");
+        return await GetMyOrderByIdAsync(userId, orderId.Value);
     }
 
     public async Task<PagedResult<OrderSummaryDto>> GetMyOrdersAsync(int userId, OrderQueryDto query)
@@ -312,25 +384,12 @@ public class OrderService : IOrderService
                 throw new BadRequestException("Giao dịch cần shop đối soát trước khi hủy đơn.");
         }
 
-        foreach (var orderItem in order.OrderItems)
-        {
-            orderItem.Variant.StockQuantity += orderItem.Quantity;
-        }
+        await CouponUsageCounter.ReleaseAsync(_context, order.CouponUsages);
+        await OrderStockRestorer.RestoreAsync(_context, order.OrderItems);
 
         if (order.CouponUsages.Count > 0)
         {
-            var couponUsage = order.CouponUsages.First();
-
-            var coupon = await _context.Coupons
-                .FirstOrDefaultAsync(x =>
-                    x.CouponId == couponUsage.CouponId);
-
-            if (coupon is not null && coupon.UsedCount > 0)
-            {
-                coupon.UsedCount -= 1;
-            }
-
-            _context.CouponUsages.Remove(couponUsage);
+            _context.CouponUsages.RemoveRange(order.CouponUsages);
         }
 
         order.OrderStatus = OrderStatus.Cancelled;
@@ -558,6 +617,8 @@ public class OrderService : IOrderService
 
     public async Task<PaymentDto> ConfirmMockQrAsync(int userId, int orderId)
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await VnpayOrderLock.AcquireAsync(_context, orderId);
         var order = await _context.Orders
             .Include(x => x.Payments)
             .FirstOrDefaultAsync(x =>
@@ -596,6 +657,7 @@ public class OrderService : IOrderService
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return new PaymentDto
         {

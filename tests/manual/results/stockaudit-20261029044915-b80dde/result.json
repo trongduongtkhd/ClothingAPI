@@ -1,0 +1,1779 @@
+{
+  "run": "stockaudit-20261029044915-b80dde",
+  "startedAt": "2026-10-29T04:49:15.481Z",
+  "method": "Unmodified current source; independent HTTP requests released together; SQL Server 2022 persisted-state assertions; disposable containers without volumes.",
+  "cases": [
+    {
+      "name": "cart:stock=10,customers=2,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.20930000022053719,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 57.62,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 46137.45299999975,
+          "orderId": 2
+        },
+        {
+          "status": 201,
+          "durationMs": 65.43,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 46137.66229999997,
+          "orderId": 3
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 2,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 3,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=5:r1",
+      "passed": true,
+      "requestStartGapMs": 0.1655000001192093,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 14.14,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 46442.8582999995,
+          "orderId": 4
+        },
+        {
+          "status": 201,
+          "durationMs": 65.14,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 46443.02379999962,
+          "orderId": 5
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 4,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 5,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=6:r1",
+      "passed": true,
+      "requestStartGapMs": 0.17549999989569187,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 16.43,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 46768.60960000008,
+          "orderId": 6
+        },
+        {
+          "status": 400,
+          "durationMs": 18.66,
+          "message": "Sản phẩm 'Audit 4' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 46768.78509999998
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 6,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "cart:stock=2,customers=5,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.37060000002384186,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 26.57,
+          "message": "Sản phẩm 'Audit 5' không đủ tồn kho.",
+          "success": false,
+          "sentAtMs": 47084.06549999956
+        },
+        {
+          "status": 201,
+          "durationMs": 18.25,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47084.22349999938,
+          "orderId": 7
+        },
+        {
+          "status": 201,
+          "durationMs": 26.66,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47084.30169999972,
+          "orderId": 8
+        },
+        {
+          "status": 400,
+          "durationMs": 26.49,
+          "message": "Sản phẩm 'Audit 5' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 47084.36739999987
+        },
+        {
+          "status": 400,
+          "durationMs": 26.33,
+          "message": "Sản phẩm 'Audit 5' không đủ tồn kho.",
+          "success": false,
+          "sentAtMs": 47084.436099999584
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 7,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 8,
+            "UserId": 4,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=1,customers=2,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.16930000018328428,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 15.39,
+          "message": "Sản phẩm 'Audit 6' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 47345.94089999981
+        },
+        {
+          "status": 201,
+          "durationMs": 15.57,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47346.110199999996,
+          "orderId": 9
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 9,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.22900000028312206,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 19.21,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47570.68179999944,
+          "orderId": 10
+        },
+        {
+          "status": 201,
+          "durationMs": 27.53,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47570.91079999972,
+          "orderId": 11
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 10,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 11,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=5:r1",
+      "passed": true,
+      "requestStartGapMs": 0.2968999994918704,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 34.81,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47807.46700000018,
+          "orderId": 13
+        },
+        {
+          "status": 201,
+          "durationMs": 23.09,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 47807.76389999967,
+          "orderId": 12
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 12,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 13,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=6:r1",
+      "passed": true,
+      "requestStartGapMs": 0.22449999954551458,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 16.29,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48043.77139999997,
+          "orderId": 14
+        },
+        {
+          "status": 400,
+          "durationMs": 15.72,
+          "message": "Sản phẩm 'Audit 9' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 48043.995899999514
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 14,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "buyNow:stock=2,customers=5,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.5378000000491738,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 24.2,
+          "message": "Sản phẩm 'Audit 10' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 48269.824799999595
+        },
+        {
+          "status": 400,
+          "durationMs": 24.44,
+          "message": "Sản phẩm 'Audit 10' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 48270.05519999936
+        },
+        {
+          "status": 201,
+          "durationMs": 17.9,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48270.19009999931,
+          "orderId": 15
+        },
+        {
+          "status": 400,
+          "durationMs": 24.09,
+          "message": "Sản phẩm 'Audit 10' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 48270.2918999996
+        },
+        {
+          "status": 201,
+          "durationMs": 24.25,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48270.362599999644,
+          "orderId": 16
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 15,
+            "UserId": 4,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 16,
+            "UserId": 6,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=1,customers=2,qty=1:r1",
+      "passed": true,
+      "requestStartGapMs": 0.2293999996036291,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 15.85,
+          "message": "Sản phẩm 'Audit 11' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 48488.34539999999
+        },
+        {
+          "status": 201,
+          "durationMs": 16.06,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48488.574799999595,
+          "orderId": 17
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 17,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.17729999963194132,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 20.22,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48744.053299999796,
+          "orderId": 19
+        },
+        {
+          "status": 201,
+          "durationMs": 14.57,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48744.23059999943,
+          "orderId": 18
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 18,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 19,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=5:r2",
+      "passed": true,
+      "requestStartGapMs": 0.17360000032931566,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 16.26,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48981.93179999944,
+          "orderId": 20
+        },
+        {
+          "status": 201,
+          "durationMs": 24.11,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 48982.10539999977,
+          "orderId": 21
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 20,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 21,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=6:r2",
+      "passed": true,
+      "requestStartGapMs": 0.16980000026524067,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 12.43,
+          "message": "Sản phẩm 'Audit 14' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 49227.24789999984
+        },
+        {
+          "status": 201,
+          "durationMs": 12.61,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 49227.41770000011,
+          "orderId": 22
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 22,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "cart:stock=2,customers=5,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.3818000005558133,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 26,
+          "message": "Sản phẩm 'Audit 15' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 49519.70869999938
+        },
+        {
+          "status": 400,
+          "durationMs": 25.55,
+          "message": "Sản phẩm 'Audit 15' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 49519.887199999765
+        },
+        {
+          "status": 400,
+          "durationMs": 25.65,
+          "message": "Sản phẩm 'Audit 15' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 49519.95990000013
+        },
+        {
+          "status": 201,
+          "durationMs": 26.09,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 49520.01829999965,
+          "orderId": 24
+        },
+        {
+          "status": 201,
+          "durationMs": 18.41,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 49520.09049999993,
+          "orderId": 23
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 23,
+            "UserId": 6,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 24,
+            "UserId": 5,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=1,customers=2,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.18319999985396862,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 14.57,
+          "message": "Sản phẩm 'Audit 16' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 49786.89190000016
+        },
+        {
+          "status": 201,
+          "durationMs": 14.83,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 49787.07510000002,
+          "orderId": 25
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 25,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.21310000028461218,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 14.48,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50001.770599999465,
+          "orderId": 26
+        },
+        {
+          "status": 201,
+          "durationMs": 20.39,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50001.98369999975,
+          "orderId": 27
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 26,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 27,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=5:r2",
+      "passed": true,
+      "requestStartGapMs": 0.1957999998703599,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 13.46,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50225.13299999945,
+          "orderId": 28
+        },
+        {
+          "status": 201,
+          "durationMs": 19.09,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50225.32879999932,
+          "orderId": 29
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 28,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 29,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=6:r2",
+      "passed": true,
+      "requestStartGapMs": 0.23469999991357327,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 15.38,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50432.944600000046,
+          "orderId": 30
+        },
+        {
+          "status": 400,
+          "durationMs": 13.38,
+          "message": "Sản phẩm 'Audit 19' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 50433.17929999996
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 30,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "buyNow:stock=2,customers=5,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.3908999999985099,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 22.17,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50649.69099999964,
+          "orderId": 32
+        },
+        {
+          "status": 400,
+          "durationMs": 21.48,
+          "message": "Sản phẩm 'Audit 20' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 50649.88260000013
+        },
+        {
+          "status": 201,
+          "durationMs": 14.85,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50649.95889999997,
+          "orderId": 31
+        },
+        {
+          "status": 400,
+          "durationMs": 21.21,
+          "message": "Sản phẩm 'Audit 20' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 50650.02730000019
+        },
+        {
+          "status": 400,
+          "durationMs": 21.38,
+          "message": "Sản phẩm 'Audit 20' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 50650.08189999964
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 31,
+            "UserId": 4,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 32,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=1,customers=2,qty=1:r2",
+      "passed": true,
+      "requestStartGapMs": 0.27309999987483025,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 14.57,
+          "message": "Sản phẩm 'Audit 21' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 50867.395599999465
+        },
+        {
+          "status": 201,
+          "durationMs": 14.67,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 50867.66869999934,
+          "orderId": 33
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 33,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 0.15160000044852495,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 13.52,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51113.65549999941,
+          "orderId": 34
+        },
+        {
+          "status": 201,
+          "durationMs": 19.82,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51113.80709999986,
+          "orderId": 35
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 34,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 35,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=5:r3",
+      "passed": true,
+      "requestStartGapMs": 0.15999999921768904,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 15.49,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51347.83600000013,
+          "orderId": 36
+        },
+        {
+          "status": 201,
+          "durationMs": 21.85,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51347.995999999344,
+          "orderId": 37
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 36,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 37,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "cart:stock=10,customers=2,qty=6:r3",
+      "passed": true,
+      "requestStartGapMs": 0.151099999435246,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 11.73,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51583.57610000018,
+          "orderId": 38
+        },
+        {
+          "status": 400,
+          "durationMs": 10.78,
+          "message": "Sản phẩm 'Audit 24' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 51583.727199999616
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 38,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "cart:stock=2,customers=5,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 0.3338000001385808,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 20.82,
+          "message": "Sản phẩm 'Audit 25' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 51851.862999999896
+        },
+        {
+          "status": 400,
+          "durationMs": 20.52,
+          "message": "Sản phẩm 'Audit 25' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 51852.01640000008
+        },
+        {
+          "status": 201,
+          "durationMs": 14.66,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51852.088399999775,
+          "orderId": 39
+        },
+        {
+          "status": 400,
+          "durationMs": 20.64,
+          "message": "Sản phẩm 'Audit 25' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 51852.14460000023
+        },
+        {
+          "status": 201,
+          "durationMs": 21.23,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 51852.196800000034,
+          "orderId": 40
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 39,
+            "UserId": 4,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 40,
+            "UserId": 6,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "cart:stock=1,customers=2,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 0.19029999990016222,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 25.32,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52121.36149999965,
+          "orderId": 41
+        },
+        {
+          "status": 400,
+          "durationMs": 24.28,
+          "message": "Sản phẩm 'Audit 26' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 52121.55179999955
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 41,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 0.19969999976456165,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 12.44,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52351.30999999959,
+          "orderId": 42
+        },
+        {
+          "status": 201,
+          "durationMs": 18.11,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52351.509699999355,
+          "orderId": 43
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 42,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 43,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=5:r3",
+      "passed": true,
+      "requestStartGapMs": 0.2885999996215105,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 15.68,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52565.95959999971,
+          "orderId": 44
+        },
+        {
+          "status": 201,
+          "durationMs": 21.74,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52566.24819999933,
+          "orderId": 45
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 10,
+        "orders": [
+          {
+            "OrderId": 44,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          },
+          {
+            "OrderId": 45,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 5
+          }
+        ],
+        "accepted": 2,
+        "rejected": 0
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 10
+      }
+    },
+    {
+      "name": "buyNow:stock=10,customers=2,qty=6:r3",
+      "passed": true,
+      "requestStartGapMs": 0.21109999995678663,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 13.81,
+          "message": "Sản phẩm 'Audit 29' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 52820.30750000011
+        },
+        {
+          "status": 201,
+          "durationMs": 14.22,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 52820.51860000007,
+          "orderId": 46
+        }
+      ],
+      "observed": {
+        "stock": 4,
+        "orderCount": 1,
+        "sold": 6,
+        "orders": [
+          {
+            "OrderId": 46,
+            "UserId": 3,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 6
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 4,
+        "sold": 6
+      }
+    },
+    {
+      "name": "buyNow:stock=2,customers=5,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 1.1347000002861023,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 15.8,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 53032.1827999996,
+          "orderId": 47
+        },
+        {
+          "status": 400,
+          "durationMs": 21.51,
+          "message": "Sản phẩm 'Audit 30' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 53032.38119999971
+        },
+        {
+          "status": 400,
+          "durationMs": 21.3,
+          "message": "Sản phẩm 'Audit 30' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 53032.46729999967
+        },
+        {
+          "status": 201,
+          "durationMs": 21.9,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 53032.53639999963,
+          "orderId": 48
+        },
+        {
+          "status": 400,
+          "durationMs": 20.67,
+          "message": "Sản phẩm 'Audit 30' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 53033.31749999989
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 2,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 47,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 48,
+            "UserId": 5,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 2,
+        "rejected": 3
+      },
+      "expected": {
+        "accepted": 2,
+        "stock": 0,
+        "sold": 2
+      }
+    },
+    {
+      "name": "buyNow:stock=1,customers=2,qty=1:r3",
+      "passed": true,
+      "requestStartGapMs": 0.192200000397861,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 13.02,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 53254.88689999934,
+          "orderId": 49
+        },
+        {
+          "status": 400,
+          "durationMs": 12.27,
+          "message": "Sản phẩm 'Audit 31' không đủ tồn kho hoặc không còn được bán.",
+          "success": false,
+          "sentAtMs": 53255.07909999974
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 1,
+        "sold": 1,
+        "orders": [
+          {
+            "OrderId": 49,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 1
+          }
+        ],
+        "accepted": 1,
+        "rejected": 1
+      },
+      "expected": {
+        "accepted": 1,
+        "stock": 0,
+        "sold": 1
+      }
+    },
+    {
+      "name": "invalid-buyNow-quantity:-1",
+      "passed": true,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 13.13,
+          "errors": {
+            "BuyNowItem.Quantity": [
+              "Số lượng phải từ 1 đến 100."
+            ]
+          }
+        }
+      ],
+      "observed": {
+        "stock": 200,
+        "orderCount": 0,
+        "sold": 0
+      },
+      "expected": {
+        "status": 400,
+        "stock": 200,
+        "orderCount": 0
+      }
+    },
+    {
+      "name": "invalid-buyNow-quantity:0",
+      "passed": true,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 2.82,
+          "errors": {
+            "BuyNowItem.Quantity": [
+              "Số lượng phải từ 1 đến 100."
+            ]
+          }
+        }
+      ],
+      "observed": {
+        "stock": 200,
+        "orderCount": 0,
+        "sold": 0
+      },
+      "expected": {
+        "status": 400,
+        "stock": 200,
+        "orderCount": 0
+      }
+    },
+    {
+      "name": "invalid-buyNow-quantity:101",
+      "passed": true,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 2.72,
+          "errors": {
+            "BuyNowItem.Quantity": [
+              "Số lượng phải từ 1 đến 100."
+            ]
+          }
+        }
+      ],
+      "observed": {
+        "stock": 200,
+        "orderCount": 0,
+        "sold": 0
+      },
+      "expected": {
+        "status": 400,
+        "stock": 200,
+        "orderCount": 0
+      }
+    },
+    {
+      "name": "different-variants-same-product",
+      "passed": true,
+      "requestStartGapMs": 0.2459999993443489,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 13.52,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 54185.29540000018,
+          "orderId": 50
+        },
+        {
+          "status": 201,
+          "durationMs": 12.99,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 54185.54139999952,
+          "orderId": 51
+        }
+      ],
+      "observed": [
+        {
+          "stock": 7,
+          "orderCount": 1,
+          "sold": 3,
+          "orders": [
+            {
+              "OrderId": 50,
+              "UserId": 2,
+              "OrderStatus": "Pending",
+              "PaymentStatus": "Unpaid",
+              "Quantity": 3
+            }
+          ]
+        },
+        {
+          "stock": 0,
+          "orderCount": 1,
+          "sold": 2,
+          "orders": [
+            {
+              "OrderId": 51,
+              "UserId": 3,
+              "OrderStatus": "Pending",
+              "PaymentStatus": "Unpaid",
+              "Quantity": 2
+            }
+          ]
+        }
+      ],
+      "expected": {
+        "stocks": [
+          7,
+          0
+        ]
+      }
+    },
+    {
+      "name": "multi-item-shortage-rolls-back",
+      "passed": true,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 7.49,
+          "message": "Sản phẩm 'Audit 38' không đủ tồn kho.",
+          "success": false
+        }
+      ],
+      "observed": {
+        "good": {
+          "stock": 10,
+          "orderCount": 0,
+          "sold": 0
+        },
+        "bad": {
+          "stock": 1,
+          "orderCount": 0,
+          "sold": 0
+        },
+        "cart": {
+          "items": 2,
+          "quantity": 3
+        }
+      },
+      "expected": {
+        "goodStock": 10,
+        "badStock": 1,
+        "cartQuantity": 3
+      }
+    },
+    {
+      "name": "already-sold-out",
+      "passed": true,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 7.89,
+          "message": "Sản phẩm 'Audit 39' không đủ tồn kho.",
+          "success": false
+        }
+      ],
+      "observed": {
+        "stock": 0,
+        "orderCount": 0,
+        "sold": 0
+      },
+      "expected": {
+        "status": 400
+      }
+    }
+  ],
+  "source": {
+    "orderServiceSha256": "2e961d35f39401f0687a93a48ee7941167290cf2182281c3628f8d30855d8c4b"
+  },
+  "server": {
+    "version": "Microsoft SQL Server 2022 (RTM-CU27) (KB5104824) - 16.0.4295.3 (X64) \n\tAug 26 2026 11:02:22 \n\tCopyright (C) 2022 Microsoft Corporation\n\tDeveloper Edition (64-bit) on Linux (Ubuntu 22.04.5 LTS) <X64>",
+    "readCommittedSnapshot": true
+  },
+  "cleanup": {
+    "stockaudit-20261029044915-b80dde-api": true,
+    "stockaudit-20261029044915-b80dde-db": true,
+    "network": true,
+    "image": true,
+    "dataDeleted": true
+  },
+  "completedAt": "2026-10-29T04:50:12.300Z",
+  "summary": {
+    "total": 36,
+    "passed": 36,
+    "failed": 0
+  }
+}

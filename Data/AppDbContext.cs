@@ -880,6 +880,11 @@ namespace ClothingAPI.Data
 
                 entity.HasKey(x => x.OrderId);
 
+                entity.Property(x => x.RequestHash).HasMaxLength(64);
+                entity.HasIndex(x => x.UserId);
+                entity.HasIndex(x => new { x.UserId, x.RequestId }).IsUnique()
+                    .HasFilter("[RequestId] IS NOT NULL");
+
                 entity.Property(x => x.OrderCode)
                     .HasMaxLength(30)
                     .IsRequired();

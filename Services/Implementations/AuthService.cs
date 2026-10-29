@@ -106,7 +106,7 @@ namespace ClothingAPI.Services.Implementations
             {
                 _logger.LogWarning(
                     "Từ chối đăng nhập: tài khoản {Email} đang bị khóa đến {LockoutEnd} UTC (còn {RemainingMinutes} phút).",
-                    email, user.LockoutEndUtc.Value, remainingMinutes
+                    email, user.LockoutEndUtc, remainingMinutes
                 );
 
                 throw new UnauthorizedException(

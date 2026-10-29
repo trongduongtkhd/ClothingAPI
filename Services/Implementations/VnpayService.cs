@@ -293,9 +293,8 @@ public sealed class VnpayService(AppDbContext db, IOptions<VnpaySettings> option
                 var payment = PaymentOf(order);
                 if (order.OrderStatus != OrderStatus.Pending || order.PaymentStatus is PaymentStatus.Paid or PaymentStatus.Refunded
                     || payment.Attempts.Any(x => Open(x) || x.RequiresReview)) continue;
-                foreach (var item in order.OrderItems) item.Variant.StockQuantity += item.Quantity;
-                foreach (var usage in order.CouponUsages)
-                    if (usage.Coupon.UsedCount > 0) usage.Coupon.UsedCount--;
+                await CouponUsageCounter.ReleaseAsync(db, order.CouponUsages);
+                await OrderStockRestorer.RestoreAsync(db, order.OrderItems);
                 db.CouponUsages.RemoveRange(order.CouponUsages);
                 order.OrderStatus = OrderStatus.Cancelled;
                 order.UpdatedAt = Now;

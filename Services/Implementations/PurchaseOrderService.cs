@@ -85,6 +85,9 @@ namespace ClothingAPI.Services.Implementations
 
         public async Task<PurchaseOrderDetailDto> CreateAsync(int createdByUserId, CreatePurchaseOrderDto dto)
         {
+            ValidateItems(dto);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
             var supplier = await _context.Suppliers
                 .FirstOrDefaultAsync(x => x.SupplierId == dto.SupplierId);
 
@@ -109,12 +112,17 @@ namespace ClothingAPI.Services.Implementations
 
             _context.PurchaseOrders.Add(purchaseOrder);
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return await GetByIdAsync(purchaseOrder.PurchaseOrderId);
         }
 
         public async Task<PurchaseOrderDetailDto> UpdateAsync(int purchaseOrderId, CreatePurchaseOrderDto dto)
         {
+            ValidateItems(dto);
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await LockPurchaseOrderAsync(purchaseOrderId);
+
             var purchaseOrder = await _context.PurchaseOrders
                 .Include(x => x.Items)
                 .FirstOrDefaultAsync(x => x.PurchaseOrderId == purchaseOrderId);
@@ -141,15 +149,18 @@ namespace ClothingAPI.Services.Implementations
             // (trường hợp hàng của phiếu cũ đã bán bớt mà lại giảm số lượng nhập).
             foreach (var variant in variants)
             {
-                var oldQuantity = oldItems.Where(x => x.VariantId == variant.VariantId).Sum(x => x.Quantity);
-                var newQuantity = dto.Items.Where(x => x.VariantId == variant.VariantId).Sum(x => x.Quantity);
+                var oldQuantity = oldItems.Where(x => x.VariantId == variant.VariantId).Sum(x => (long)x.Quantity);
+                var newQuantity = dto.Items.Where(x => x.VariantId == variant.VariantId).Sum(x => (long)x.Quantity);
+                var finalStock = variant.StockQuantity - oldQuantity + newQuantity;
 
-                if (variant.StockQuantity - oldQuantity + newQuantity < 0)
+                if (finalStock < 0)
                 {
                     throw new BadRequestException(
                         $"Không thể sửa: biến thể {variant.SKU} hiện chỉ còn tồn {variant.StockQuantity}, " +
                         $"không đủ để giảm từ {oldQuantity} xuống {newQuantity} (hàng đã được bán bớt).");
                 }
+                if (finalStock > int.MaxValue)
+                    throw new BadRequestException($"Không thể sửa: tồn kho của biến thể {variant.SKU} vượt giới hạn.");
             }
 
             // Hoàn tác phiếu cũ rồi nhập lại theo nội dung mới.
@@ -169,15 +180,18 @@ namespace ClothingAPI.Services.Implementations
             AddItemsAndStockIn(purchaseOrder, dto.Items, variants);
 
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return await GetByIdAsync(purchaseOrder.PurchaseOrderId);
         }
 
         public async Task<PurchaseOrderDetailDto> CancelAsync(int purchaseOrderId, CancelPurchaseOrderDto dto)
         {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await LockPurchaseOrderAsync(purchaseOrderId);
+
             var purchaseOrder = await _context.PurchaseOrders
                 .Include(x => x.Items)
-                    .ThenInclude(x => x.Variant)
                 .FirstOrDefaultAsync(x => x.PurchaseOrderId == purchaseOrderId);
 
             if (purchaseOrder is null)
@@ -187,11 +201,15 @@ namespace ClothingAPI.Services.Implementations
 
             EnsureNotCancelled(purchaseOrder);
 
+            // Lock all affected variants before reading their stock/cost, just as
+            // create/update do. A sale or return must wait until this transaction ends.
+            var variants = await LoadVariantsAsync(purchaseOrder.Items.Select(x => x.VariantId));
+
             // Hàng của phiếu này có thể đã bán bớt: tồn kho phải đủ để trừ lại toàn bộ.
             var shortages = purchaseOrder.Items
-                .GroupBy(x => x.Variant)
-                .Where(g => g.Key.StockQuantity < g.Sum(x => x.Quantity))
-                .Select(g => $"{g.Key.SKU} (tồn {g.Key.StockQuantity}, cần trừ {g.Sum(x => x.Quantity)})")
+                .GroupBy(x => variants.Single(v => v.VariantId == x.VariantId))
+                .Where(g => g.Key.StockQuantity < g.Sum(x => (long)x.Quantity))
+                .Select(g => $"{g.Key.SKU} (tồn {g.Key.StockQuantity}, cần trừ {g.Sum(x => (long)x.Quantity)})")
                 .ToList();
 
             if (shortages.Count > 0)
@@ -203,7 +221,7 @@ namespace ClothingAPI.Services.Implementations
 
             foreach (var item in purchaseOrder.Items)
             {
-                ReverseStockIn(item.Variant, item.Quantity, item.UnitCost);
+                ReverseStockIn(variants.Single(x => x.VariantId == item.VariantId), item.Quantity, item.UnitCost);
             }
 
             purchaseOrder.Status = PurchaseOrderStatuses.Cancelled;
@@ -211,13 +229,24 @@ namespace ClothingAPI.Services.Implementations
             purchaseOrder.CancelReason = dto.Reason.Trim();
 
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return await GetByIdAsync(purchaseOrder.PurchaseOrderId);
         }
 
         private async Task<List<ProductVariant>> LoadVariantsAsync(IEnumerable<int> ids)
         {
-            var variantIds = ids.Distinct().ToList();
+            var variantIds = ids.Distinct().OrderBy(x => x).ToList();
+
+            // SQL Server RCSI reads alone do not serialize a read/compute/write cycle.
+            // Update locks conflict with both purchase writers and atomic order stock
+            // updates; HOLDLOCK keeps them until commit/rollback. Always use ID order.
+            if (_context.Database.IsSqlServer())
+                foreach (var variantId in variantIds)
+                    await _context.Database.ExecuteSqlInterpolatedAsync($"SELECT VariantId FROM ProductVariants WITH (UPDLOCK, HOLDLOCK) WHERE VariantId = {variantId};");
+
+            var previouslyTracked = _context.ChangeTracker.Entries<ProductVariant>()
+                .Select(x => x.Entity.VariantId).ToHashSet();
 
             var variants = await _context.ProductVariants
                 .Include(x => x.Product)
@@ -231,7 +260,27 @@ namespace ClothingAPI.Services.Implementations
                 throw new NotFoundException("Một số biến thể sản phẩm không tồn tại.");
             }
 
+            foreach (var variant in variants.Where(x => previouslyTracked.Contains(x.VariantId)))
+                await _context.Entry(variant).ReloadAsync();
+
+            if (variants.Any(x => x.StockQuantity < 0))
+                throw new BadRequestException("Tồn kho hiện tại không hợp lệ. Vui lòng đối soát trước khi sửa phiếu nhập.");
+
             return variants;
+        }
+
+        private async Task LockPurchaseOrderAsync(int purchaseOrderId)
+        {
+            if (_context.Database.IsSqlServer())
+                await _context.Database.ExecuteSqlInterpolatedAsync($"SELECT PurchaseOrderId FROM PurchaseOrders WITH (UPDLOCK, HOLDLOCK) WHERE PurchaseOrderId = {purchaseOrderId};");
+        }
+
+        private static void ValidateItems(CreatePurchaseOrderDto dto)
+        {
+            if (dto.Items is null || dto.Items.Count == 0 || dto.Items.Any(x => x.Quantity <= 0 || x.UnitCost <= 0))
+                throw new BadRequestException("Phiếu nhập phải có sản phẩm với số lượng và đơn giá lớn hơn 0.");
+            if (dto.Items.GroupBy(x => x.VariantId).Any(g => g.Sum(x => (long)x.Quantity) > int.MaxValue))
+                throw new BadRequestException("Tổng số lượng nhập của một biến thể vượt giới hạn.");
         }
 
         private static void AddItemsAndStockIn(
@@ -259,6 +308,8 @@ namespace ClothingAPI.Services.Implementations
                 });
 
                 totalAmount += lineTotal;
+                if (totalAmount > 9999999999999999.99m)
+                    throw new BadRequestException("Tổng tiền phiếu nhập vượt giới hạn.");
 
                 ApplyStockIn(variant, itemDto.Quantity, itemDto.UnitCost);
             }
@@ -270,14 +321,18 @@ namespace ClothingAPI.Services.Implementations
         // Giá vốn mới = (Tồn cũ × Giá vốn cũ + SL nhập × Giá nhập) / (Tồn cũ + SL nhập)
         private static void ApplyStockIn(ProductVariant variant, int quantity, decimal unitCost)
         {
+            var newStock = (long)variant.StockQuantity + quantity;
+            if (newStock > int.MaxValue)
+                throw new BadRequestException($"Tồn kho của biến thể {variant.SKU} vượt giới hạn.");
+
             var oldStock = Math.Max(variant.StockQuantity, 0);
             var oldCost = variant.AverageCostPrice ?? unitCost;
 
             variant.AverageCostPrice = Math.Round(
-                (oldStock * oldCost + quantity * unitCost) / (oldStock + quantity),
+                (oldStock * oldCost + quantity * unitCost) / ((long)oldStock + quantity),
                 2);
 
-            variant.StockQuantity += quantity;
+            variant.StockQuantity = (int)newStock;
         }
 
         // Hoàn tác nhập kho: trừ tồn kho và bỏ phần giá trị của lô hàng này khỏi giá vốn.

@@ -1,0 +1,5 @@
+**
+!tests/
+!tests/manual/
+!tests/manual/.publish/
+!tests/manual/.publish/**

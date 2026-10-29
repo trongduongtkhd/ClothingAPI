@@ -5,6 +5,9 @@ namespace ClothingAPI.DTOs.Orders;
 
 public class CreateOrderDto
 {
+    [Required(ErrorMessage = "Mã yêu cầu đặt hàng là bắt buộc.")]
+    public Guid? RequestId { get; set; }
+
     [Range(1, int.MaxValue, ErrorMessage = "Địa chỉ giao hàng không hợp lệ.")]
     public int AddressId { get; set; }
 

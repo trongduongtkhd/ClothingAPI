@@ -10,6 +10,9 @@ public class Order
 
     public int UserId { get; set; }
 
+    public Guid? RequestId { get; set; }
+    public string? RequestHash { get; set; }
+
     public string ReceiverName { get; set; } = string.Empty;
 
     public string ReceiverPhone { get; set; } = string.Empty;

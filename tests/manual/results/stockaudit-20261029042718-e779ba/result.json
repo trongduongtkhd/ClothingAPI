@@ -1,0 +1,614 @@
+{
+  "run": "stockaudit-20261029042718-e779ba",
+  "startedAt": "2026-10-29T04:27:18.667Z",
+  "method": "Unmodified current source; independent HTTP requests released together; SQL Server 2022 persisted-state assertions; disposable containers without volumes.",
+  "cases": [
+    {
+      "name": "return-two-orders-one-variant:r1",
+      "passed": false,
+      "requestStartGapMs": 0.4734000004827976,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 117.08,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 26709.349399999715,
+          "orderId": 2
+        },
+        {
+          "status": 200,
+          "durationMs": 117.18,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 26709.8228000002,
+          "orderId": 3
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 2,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 2,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          },
+          {
+            "OrderId": 3,
+            "UserId": 3,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 3
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "sold": 0
+      }
+    },
+    {
+      "name": "return-same-order:r1",
+      "passed": true,
+      "requestStartGapMs": 0.23680000007152557,
+      "responses": [
+        {
+          "status": 400,
+          "durationMs": 22.17,
+          "message": "Yêu cầu trả hàng này đã được xử lý.",
+          "success": false,
+          "sentAtMs": 27153.424800000153
+        },
+        {
+          "status": 200,
+          "durationMs": 18.33,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 27153.661600000225,
+          "orderId": 4
+        }
+      ],
+      "observed": {
+        "stock": 10,
+        "orderCount": 1,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 4,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "accepted": 1
+      }
+    },
+    {
+      "name": "cancel-stock-in-vs-sale:r1",
+      "passed": true,
+      "requestStartGapMs": 0.2805000003427267,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 54.24,
+          "message": "Hủy phiếu nhập kho thành công.",
+          "success": true,
+          "sentAtMs": 27589.13019999955,
+          "purchaseOrderId": 1
+        },
+        {
+          "status": 201,
+          "durationMs": 18.88,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 27589.41069999989,
+          "orderId": 5
+        }
+      ],
+      "observed": {
+        "stock": 8,
+        "orderCount": 1,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 5,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "coupon-per-user-limit:r1",
+      "passed": false,
+      "requestStartGapMs": 0.2873999997973442,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 143.49,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 28114.92449999973,
+          "orderId": 7
+        },
+        {
+          "status": 201,
+          "durationMs": 138.77,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 28115.21189999953,
+          "orderId": 6
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUserUsages": 2
+      },
+      "expected": {
+        "actualUserUsages": 1
+      }
+    },
+    {
+      "name": "coupon-restore-concurrent-cancel:r1",
+      "passed": false,
+      "requestStartGapMs": 0.22520000021904707,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 36.35,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 28839.00829999987
+        },
+        {
+          "status": 200,
+          "durationMs": 39.67,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 28839.23350000009
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUsages": 0
+      },
+      "expected": {
+        "usedCount": 0,
+        "actualUsages": 0
+      }
+    },
+    {
+      "name": "return-two-orders-one-variant:r2",
+      "passed": false,
+      "requestStartGapMs": 0.23799999989569187,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 24.23,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 29280.944699999876,
+          "orderId": 10
+        },
+        {
+          "status": 200,
+          "durationMs": 15.9,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 29281.182699999772,
+          "orderId": 11
+        }
+      ],
+      "observed": {
+        "stock": 7,
+        "orderCount": 2,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 10,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          },
+          {
+            "OrderId": 11,
+            "UserId": 3,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 3
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "sold": 0
+      }
+    },
+    {
+      "name": "return-same-order:r2",
+      "passed": true,
+      "requestStartGapMs": 0.40870000049471855,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 15.81,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 29633.844499999657,
+          "orderId": 12
+        },
+        {
+          "status": 400,
+          "durationMs": 15.94,
+          "message": "Yêu cầu trả hàng này đã được xử lý.",
+          "success": false,
+          "sentAtMs": 29634.253200000152
+        }
+      ],
+      "observed": {
+        "stock": 10,
+        "orderCount": 1,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 12,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "accepted": 1
+      }
+    },
+    {
+      "name": "cancel-stock-in-vs-sale:r2",
+      "passed": false,
+      "requestStartGapMs": 0.4031000006943941,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 14.33,
+          "message": "Hủy phiếu nhập kho thành công.",
+          "success": true,
+          "sentAtMs": 29923.727699999698,
+          "purchaseOrderId": 2
+        },
+        {
+          "status": 201,
+          "durationMs": 17.43,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 29924.130800000392,
+          "orderId": 13
+        }
+      ],
+      "observed": {
+        "stock": 13,
+        "orderCount": 1,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 13,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "coupon-per-user-limit:r2",
+      "passed": false,
+      "requestStartGapMs": 0.37039999943226576,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 27.21,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 30459.991000000387,
+          "orderId": 14
+        },
+        {
+          "status": 201,
+          "durationMs": 31.77,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 30460.36139999982,
+          "orderId": 15
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUserUsages": 2
+      },
+      "expected": {
+        "actualUserUsages": 1
+      }
+    },
+    {
+      "name": "coupon-restore-concurrent-cancel:r2",
+      "passed": false,
+      "requestStartGapMs": 0.2643999997526407,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 17.71,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 31091.006599999964
+        },
+        {
+          "status": 200,
+          "durationMs": 20.75,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 31091.270999999717
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUsages": 0
+      },
+      "expected": {
+        "usedCount": 0,
+        "actualUsages": 0
+      }
+    },
+    {
+      "name": "return-two-orders-one-variant:r3",
+      "passed": false,
+      "requestStartGapMs": 0.17529999930411577,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 14.88,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 31624.593600000255,
+          "orderId": 18
+        },
+        {
+          "status": 200,
+          "durationMs": 13.79,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 31624.76889999956,
+          "orderId": 19
+        }
+      ],
+      "observed": {
+        "stock": 7,
+        "orderCount": 2,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 18,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          },
+          {
+            "OrderId": 19,
+            "UserId": 3,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 3
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "sold": 0
+      }
+    },
+    {
+      "name": "return-same-order:r3",
+      "passed": true,
+      "requestStartGapMs": 0.33059999998658895,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 13.25,
+          "message": "Đã duyệt trả hàng và hoàn tiền cho khách.",
+          "success": true,
+          "sentAtMs": 31959.061800000258,
+          "orderId": 20
+        },
+        {
+          "status": 400,
+          "durationMs": 14.05,
+          "message": "Yêu cầu trả hàng này đã được xử lý.",
+          "success": false,
+          "sentAtMs": 31959.392400000244
+        }
+      ],
+      "observed": {
+        "stock": 10,
+        "orderCount": 1,
+        "sold": 0,
+        "orders": [
+          {
+            "OrderId": 20,
+            "UserId": 2,
+            "OrderStatus": "Returned",
+            "PaymentStatus": "Refunded",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 10,
+        "accepted": 1
+      }
+    },
+    {
+      "name": "cancel-stock-in-vs-sale:r3",
+      "passed": false,
+      "requestStartGapMs": 0.25389999989420176,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 14.59,
+          "message": "Hủy phiếu nhập kho thành công.",
+          "success": true,
+          "sentAtMs": 32245.316399999894,
+          "purchaseOrderId": 3
+        },
+        {
+          "status": 201,
+          "durationMs": 20.76,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 32245.57029999979,
+          "orderId": 21
+        }
+      ],
+      "observed": {
+        "stock": 13,
+        "orderCount": 1,
+        "sold": 2,
+        "orders": [
+          {
+            "OrderId": 21,
+            "UserId": 2,
+            "OrderStatus": "Pending",
+            "PaymentStatus": "Unpaid",
+            "Quantity": 2
+          }
+        ]
+      },
+      "expected": {
+        "stock": 8,
+        "sold": 2
+      }
+    },
+    {
+      "name": "coupon-per-user-limit:r3",
+      "passed": false,
+      "requestStartGapMs": 0.3439999995753169,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 24.14,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 32801.8013000004,
+          "orderId": 23
+        },
+        {
+          "status": 201,
+          "durationMs": 20.6,
+          "message": "Đặt hàng thành công.",
+          "success": true,
+          "sentAtMs": 32802.145299999975,
+          "orderId": 22
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUserUsages": 2
+      },
+      "expected": {
+        "actualUserUsages": 1
+      }
+    },
+    {
+      "name": "coupon-restore-concurrent-cancel:r3",
+      "passed": false,
+      "requestStartGapMs": 0.20790000073611736,
+      "responses": [
+        {
+          "status": 200,
+          "durationMs": 14.77,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 33338.70419999957
+        },
+        {
+          "status": 200,
+          "durationMs": 17.41,
+          "message": "Hủy đơn hàng thành công.",
+          "success": true,
+          "sentAtMs": 33338.91210000031
+        }
+      ],
+      "observed": {
+        "usedCount": 1,
+        "actualUsages": 0
+      },
+      "expected": {
+        "usedCount": 0,
+        "actualUsages": 0
+      }
+    },
+    {
+      "name": "stock-in-integer-overflow",
+      "passed": false,
+      "requestStartGapMs": 0,
+      "responses": [
+        {
+          "status": 201,
+          "durationMs": 19.58,
+          "message": "Tạo phiếu nhập kho thành công.",
+          "success": true,
+          "purchaseOrderId": 4
+        }
+      ],
+      "observed": {
+        "stock": -2147483639,
+        "orderCount": 0,
+        "sold": 0
+      },
+      "expected": {
+        "rejected": true,
+        "stock": 10
+      }
+    }
+  ],
+  "source": {
+    "orderServiceSha256": "d681c93301deb45bb54a7dc98adc562627394b6686a53a114d00dfbbd0df0ba9"
+  },
+  "server": {
+    "version": "Microsoft SQL Server 2022 (RTM-CU27) (KB5104824) - 16.0.4295.3 (X64) \n\tAug 26 2026 11:02:22 \n\tCopyright (C) 2022 Microsoft Corporation\n\tDeveloper Edition (64-bit) on Linux (Ubuntu 22.04.5 LTS) <X64>",
+    "readCommittedSnapshot": true
+  },
+  "cleanup": {
+    "stockaudit-20261029042718-e779ba-api": true,
+    "stockaudit-20261029042718-e779ba-db": true,
+    "network": true,
+    "image": true,
+    "dataDeleted": true
+  },
+  "completedAt": "2026-10-29T04:27:53.658Z",
+  "summary": {
+    "total": 16,
+    "passed": 4,
+    "failed": 12
+  }
+}

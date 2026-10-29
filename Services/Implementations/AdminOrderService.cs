@@ -1,4 +1,4 @@
-﻿using ClothingAPI.Data;
+using ClothingAPI.Data;
 using ClothingAPI.DTOs.Orders;
 using ClothingAPI.Enums;
 using ClothingAPI.Exceptions;
@@ -157,10 +157,8 @@ public class AdminOrderService : IAdminOrderService
 
         if (dto.Status == OrderStatus.Cancelled)
         {
-            foreach (var orderItem in order.OrderItems)
-            {
-                orderItem.Variant.StockQuantity += orderItem.Quantity;
-            }
+            await CouponUsageCounter.ReleaseAsync(_context, order.CouponUsages);
+            await OrderStockRestorer.RestoreAsync(_context, order.OrderItems);
 
             // Khách đã thanh toán trước (QR) mà đơn bị hủy thì phải hoàn tiền.
             var payment = order.Payments.FirstOrDefault();
@@ -173,16 +171,7 @@ public class AdminOrderService : IAdminOrderService
 
             if (order.CouponUsages.Count > 0)
             {
-                var couponUsage = order.CouponUsages.First();
-
-                var coupon = await _context.Coupons.FirstOrDefaultAsync(x => x.CouponId == couponUsage.CouponId);
-
-                if (coupon is not null && coupon.UsedCount > 0)
-                {
-                    coupon.UsedCount -= 1;
-                }
-
-                _context.CouponUsages.Remove(couponUsage);
+                _context.CouponUsages.RemoveRange(order.CouponUsages);
             }
         }
 
@@ -209,6 +198,8 @@ public class AdminOrderService : IAdminOrderService
     public async Task<PaymentDto> UpdatePaymentStatusAsync(int adminUserId, int orderId, UpdatePaymentStatusDto dto)
 
     {
+        await using var transaction = await _context.Database.BeginTransactionAsync();
+        await VnpayOrderLock.AcquireAsync(_context, orderId);
         var order = await _context.Orders
             .Include(x => x.Payments)
             .FirstOrDefaultAsync(x => x.OrderId == orderId);
@@ -275,6 +266,7 @@ public class AdminOrderService : IAdminOrderService
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return new PaymentDto
         {
@@ -302,15 +294,12 @@ public class AdminOrderService : IAdminOrderService
 
         var request = GetPendingReturnRequest(order);
 
-        foreach (var orderItem in order!.OrderItems)
-        {
-            orderItem.Variant.StockQuantity += orderItem.Quantity;
-        }
-
-        var payment = order.Payments.FirstOrDefault();
+        var payment = order!.Payments.FirstOrDefault();
 
         if (payment?.PaymentMethod == PaymentMethod.VnPay)
             throw new BadRequestException("Hoàn tiền qua VNPAY chưa được bật. Chưa thể duyệt trả hàng cho giao dịch này.");
+
+        await OrderStockRestorer.RestoreAsync(_context, order.OrderItems);
 
         if (payment is not null)
         {

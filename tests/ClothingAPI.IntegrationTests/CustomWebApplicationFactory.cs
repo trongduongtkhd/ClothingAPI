@@ -3,6 +3,7 @@ using ClothingAPI.Enums;
 using ClothingAPI.Models;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
@@ -67,6 +68,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
+            // Isolate test encryption from the developer's persistent DPAPI keys.
+            // The real crypto implementation stays active for the full 2FA flow.
+            services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
+
             var descriptors = services
                 .Where(d =>
                     d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||

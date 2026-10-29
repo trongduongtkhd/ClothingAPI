@@ -1,3 +1,14 @@
+# L01 — Kiểm thử hồi quy sau sửa tồn kho
+
+Chạy từ thư mục gốc backend (Docker engine đang chạy):
+
+```powershell
+dotnet publish ClothingAPI.csproj -c Release --no-restore -o tests/manual/.publish /p:UseAppHost=false
+node tests/manual/order-stock-audit.cjs --l01-only
+```
+
+Tập này gồm 30 lượt mua đồng thời (tồn 10/2/1, qua giỏ và Mua ngay, mỗi tình huống lặp 3 lần) và 6 ca kiểm tra checkout. Script tạo API/SQL Server riêng, tự xóa toàn bộ dữ liệu/container/network/image thử, chỉ giữ JSON/log. Không cần khởi động container cửa hàng. Xem [bản sửa và kết quả L01](../../docs/L01-FIX.md).
+
 # PT009 / P8 — Hai khách mua sản phẩm cuối cùng
 
 Chạy từ thư mục gốc ClothingAPI:
