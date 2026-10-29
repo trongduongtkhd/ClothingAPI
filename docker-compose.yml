@@ -40,6 +40,14 @@ services:
       TZ: Asia/Ho_Chi_Minh
       ASPNETCORE_ENVIRONMENT: Docker
       ASPNETCORE_URLS: http://+:8080
+      VnpaySettings__Enabled: ${VNPAY_ENABLED:-false}
+      VnpaySettings__TmnCode: ${VNPAY_TMN_CODE:-}
+      VnpaySettings__HashSecret: ${VNPAY_HASH_SECRET:-}
+      VnpaySettings__PublicBaseUrl: ${VNPAY_PUBLIC_BASE_URL:-http://localhost:4200}
+      VnpaySettings__PaymentMinutes: ${VNPAY_PAYMENT_MINUTES:-15}
+      VnpaySettings__OrderMinutes: ${VNPAY_ORDER_MINUTES:-30}
+      Chatbot__OllamaUrl: http://ollama:11434
+      Chatbot__Model: qwen3:1.7b
       ConnectionStrings__DefaultConnection: "Server=db,1433;Database=ClothingStoreDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};Encrypt=False;TrustServerCertificate=True;MultipleActiveResultSets=True"
       JwtSettings__SecretKey: ${JWT_SECRET_KEY}
       JwtSettings__Issuer: ${JWT_ISSUER}
@@ -79,6 +87,29 @@ services:
       db:
         condition: service_healthy
 
+  # AI chạy trên máy hiện tại, không dùng Ollama Cloud hoặc API trả phí.
+  # Không publish cổng Ollama ra Internet; chỉ API truy cập qua mạng Docker.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: clothing-ollama
+    restart: unless-stopped
+    gpus: all
+    mem_limit: 3g
+    environment:
+      OLLAMA_NO_CLOUD: "1"
+      OLLAMA_NUM_PARALLEL: "1"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_CONTEXT_LENGTH: "4096"
+      OLLAMA_KEEP_ALIVE: "2m"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
   frontend:
     build:
       # Mặc định: repo frontend nằm cạnh repo backend (cùng thư mục cha).
@@ -100,3 +131,4 @@ volumes:
   sqlserver_data:
   uploads_data:
   dataprotection_data:
+  ollama_data:

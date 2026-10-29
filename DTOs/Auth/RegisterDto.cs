@@ -5,16 +5,18 @@ namespace ClothingAPI.DTOs.Auth
 {
     public class RegisterDto
     {
+        private string _fullName = string.Empty;
+        private string _email = string.Empty;
+        private string? _phoneNumber;
+
         [Required(ErrorMessage = "Họ tên là bắt buộc.")]
         [StringLength(150, ErrorMessage = "Họ tên không được vượt quá 150 ký tự.")]
-        public string FullName { get; set; } = string.Empty;
+        [PersonName]
+        public string FullName { get => _fullName; set => _fullName = UserInputRules.NormalizeFullName(value); }
 
         [Required(ErrorMessage = "Email là bắt buộc.")]
-        [EmailAddress(ErrorMessage = "Email không đúng định dạng.")]
-        // [EmailAddress] vẫn chấp nhận "abc@gmail" (thiếu tên miền), nên bắt buộc thêm phần ".xx" ở cuối.
-        [RegularExpression(@"^\s*[^\s@]+@[^\s@]+\.[A-Za-z]{2,}\s*$", ErrorMessage = "Email không đúng định dạng.")]
-        [StringLength(255)]
-        public string Email { get; set; } = string.Empty;
+        [AccountEmail]
+        public string Email { get => _email; set => _email = UserInputRules.NormalizeEmail(value); }
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
         [StrongPassword]
@@ -24,8 +26,8 @@ namespace ClothingAPI.DTOs.Auth
         [Compare(nameof(Password), ErrorMessage = "Xác nhận mật khẩu không khớp.")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [StringLength(20)]
-        public string? PhoneNumber { get; set; }
+        [VietnameseMobilePhone]
+        public string? PhoneNumber { get => _phoneNumber; set => _phoneNumber = UserInputRules.NormalizePhone(value); }
 
         // Token Cloudflare Turnstile (dùng một lần, hết hạn sau ~5 phút).
         [Required(ErrorMessage = "Vui lòng hoàn tất xác minh CAPTCHA.")]

@@ -61,15 +61,17 @@ public class CartController : ControllerBase
     }
 
     [HttpDelete("items/{cartItemId:int}")]
-    public async Task<ActionResult<ApiResponse<object>>> DeleteItem(int cartItemId)
+    public async Task<ActionResult<ApiResponse<CartDto>>> DeleteItem(int cartItemId)
     {
         var userId = User.GetUserId();
 
         await _cartService.DeleteItemAsync(userId, cartItemId);
+        var cart = await _cartService.GetMyCartAsync(userId);
 
-        return Ok(new ApiResponse<object>(
+        return Ok(new ApiResponse<CartDto>(
             true,
-            "Xóa sản phẩm khỏi giỏ hàng thành công."
+            "Xóa sản phẩm khỏi giỏ hàng thành công.",
+            cart
         ));
     }
 

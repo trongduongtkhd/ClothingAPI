@@ -35,6 +35,7 @@ namespace ClothingAPI.Data
         public DbSet<OrderItem> OrderItems { get; set; }
 
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentAttempt> PaymentAttempts { get; set; }
 
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
@@ -84,6 +85,22 @@ namespace ClothingAPI.Data
             ConfigureOrder(modelBuilder);
             ConfigureOrderItem(modelBuilder);
             ConfigurePayment(modelBuilder);
+            modelBuilder.Entity<PaymentAttempt>(entity =>
+            {
+                entity.HasKey(x => x.PaymentAttemptId);
+                entity.Property(x => x.TxnRef).HasMaxLength(100).IsRequired();
+                entity.HasIndex(x => x.TxnRef).IsUnique();
+                entity.Property(x => x.Amount).HasPrecision(18, 2);
+                entity.Property(x => x.Currency).HasMaxLength(3);
+                entity.Property(x => x.Status).HasConversion<string>().HasMaxLength(30);
+                entity.Property(x => x.PaymentUrl).HasMaxLength(4096);
+                entity.Property(x => x.GatewayTransactionNo).HasMaxLength(150);
+                entity.Property(x => x.BankCode).HasMaxLength(30);
+                entity.Property(x => x.ResponseCode).HasMaxLength(10);
+                entity.Property(x => x.TransactionStatus).HasMaxLength(10);
+                entity.HasOne(x => x.Payment).WithMany(x => x.Attempts).HasForeignKey(x => x.PaymentId);
+                entity.HasIndex(x => new { x.PaymentId, x.CreatedAt });
+            });
             ConfigureOrderStatusHistory(modelBuilder);
             ConfigureCouponUsage(modelBuilder);
             ConfigureReturnRequest(modelBuilder);

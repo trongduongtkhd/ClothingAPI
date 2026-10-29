@@ -25,5 +25,8 @@
         public decimal TotalPrice { get; set; }
 
         public bool IsAvailable { get; set; }
+
+        // Separate sale status from insufficient stock so the customer can reduce quantity.
+        public bool IsForSale { get; set; }
     }
 }

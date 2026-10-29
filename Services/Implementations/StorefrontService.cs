@@ -100,8 +100,9 @@ public class StorefrontService : IStorefrontService
 
         if (query.CategoryId.HasValue)
         {
+            var categoryIds = await GetActiveCategoryBranchIdsAsync(query.CategoryId.Value);
             products = products.Where(x =>
-                x.CategoryId == query.CategoryId.Value);
+                categoryIds.Contains(x.CategoryId));
         }
 
         if (query.BrandId.HasValue)
@@ -162,6 +163,42 @@ public class StorefrontService : IStorefrontService
             TotalItems = totalItems,
             TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
         };
+    }
+
+    private async Task<int[]> GetActiveCategoryBranchIdsAsync(int categoryId)
+    {
+        var categories = await _context.Categories
+            .AsNoTracking()
+            .Where(x => x.IsActive)
+            .Select(x => new { x.CategoryId, x.ParentCategoryId })
+            .ToListAsync();
+
+        if (!categories.Any(x => x.CategoryId == categoryId))
+        {
+            return [];
+        }
+
+        var childrenByParent = categories
+            .Where(x => x.ParentCategoryId.HasValue)
+            .ToLookup(x => x.ParentCategoryId!.Value, x => x.CategoryId);
+        var categoryIds = new HashSet<int>();
+        var pending = new Stack<int>();
+        pending.Push(categoryId);
+
+        while (pending.TryPop(out var currentId))
+        {
+            if (!categoryIds.Add(currentId))
+            {
+                continue;
+            }
+
+            foreach (var childId in childrenByParent[currentId])
+            {
+                pending.Push(childId);
+            }
+        }
+
+        return categoryIds.ToArray();
     }
 
     public async Task<List<PublicProductListDto>> GetFeaturedProductsAsync(int limit)

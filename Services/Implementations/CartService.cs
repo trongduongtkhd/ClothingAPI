@@ -24,6 +24,8 @@ public class CartService : ICartService
 
     public async Task<CartDto> AddItemAsync(int userId, AddCartItemDto dto)
     {
+        EnsureValidQuantity(dto.Quantity);
+
         var variant = await _context.ProductVariants
             .Include(x => x.Product)
             .FirstOrDefaultAsync(x => x.VariantId == dto.VariantId);
@@ -48,12 +50,8 @@ public class CartService : ICartService
         var cartItem = await _context.CartItems
             .FirstOrDefaultAsync(x => x.UserId == userId && x.VariantId == dto.VariantId);
 
-        var finalQuantity = dto.Quantity;
-
-        if (cartItem is not null)
-        {
-            finalQuantity += cartItem.Quantity;
-        }
+        var finalQuantity = (long)dto.Quantity + (cartItem?.Quantity ?? 0);
+        EnsureValidQuantity(finalQuantity);
 
         if (finalQuantity > variant.StockQuantity)
         {
@@ -76,7 +74,7 @@ public class CartService : ICartService
         }
         else
         {
-            cartItem.Quantity = finalQuantity;
+            cartItem.Quantity = (int)finalQuantity;
             cartItem.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -87,6 +85,8 @@ public class CartService : ICartService
 
     public async Task<CartDto> UpdateItemAsync(int userId, int cartItemId, UpdateCartItemDto dto)
     {
+        EnsureValidQuantity(dto.Quantity);
+
         var cartItem = await _context.CartItems
             .Include(x => x.Variant)
                 .ThenInclude(x => x.Product)
@@ -209,7 +209,18 @@ public class CartService : ICartService
             StockQuantity = variant.StockQuantity,
             Quantity = cartItem.Quantity,
             TotalPrice = unitPrice * cartItem.Quantity,
-            IsAvailable = variant.IsActive && product.IsActive && variant.StockQuantity >= cartItem.Quantity
+            IsForSale = variant.IsActive && product.IsActive,
+            IsAvailable = variant.IsActive && product.IsActive
+                && cartItem.Quantity is >= 1 and <= 100
+                && variant.StockQuantity >= cartItem.Quantity
         };
+    }
+
+    private static void EnsureValidQuantity(long quantity)
+    {
+        if (quantity is < 1 or > 100)
+        {
+            throw new BadRequestException("Số lượng phải từ 1 đến 100.");
+        }
     }
 }

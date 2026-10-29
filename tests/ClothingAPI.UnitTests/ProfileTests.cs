@@ -4,7 +4,7 @@ using Xunit.Abstractions;
 
 namespace ClothingAPI.UnitTests;
 
-/// UpdateProfileDto ([Required]/[StringLength]) + UserProfileService.UpdateProfileAsync: ràng buộc họ tên (150) và SĐT (20).
+/// UpdateProfileDto + UserProfileService.UpdateProfileAsync: họ tên tối đa 150 và số di động Việt Nam hợp lệ.
 public class ProfileTests : UnitTestBase
 {
     public ProfileTests(ITestOutputHelper output) : base(output) { }
@@ -70,27 +70,27 @@ public class ProfileTests : UnitTestBase
     }
 
     [Fact]
-    public async Task UT087_HoSo_SoDienThoai20KyTu_LuuThanhCong()
+    public async Task UT087_HoSo_SoDienThoai10ChuSo_LuuThanhCong()
     {
-        Step1("Nhập SĐT đúng 20 ký tự rồi lưu");
+        Step1("Nhập số di động Việt Nam hợp lệ có 10 chữ số rồi lưu");
 
-        var (errors, error) = await SaveAsync(Dto("Khách hàng", new string('1', 20)));
+        var (errors, error) = await SaveAsync(Dto("Khách hàng", "0901234567"));
         Actual($"validation DTO: {errors.Count} lỗi; service: {Describe(error)}; SĐT đã lưu dài {Saved().Phone?.Length}");
 
         Assert.Empty(errors);
         Assert.Null(error);
-        Assert.Equal(20, Saved().Phone!.Length);
+        Assert.Equal("0901234567", Saved().Phone);
     }
 
     [Fact]
-    public async Task UT088_HoSo_SoDienThoai21KyTu_BiTuChoi()
+    public async Task UT088_HoSo_SoDienThoai11ChuSo_BiTuChoi()
     {
-        Step1("Nhập SĐT 21 ký tự rồi lưu");
+        Step1("Nhập số di động dư một chữ số rồi lưu");
 
-        var (errors, error) = await SaveAsync(Dto("Khách hàng", new string('1', 21)));
+        var (errors, error) = await SaveAsync(Dto("Khách hàng", "09012345678"));
         Actual($"validation DTO: \"{string.Join("; ", errors)}\"; service: {Describe(error)}; SĐT giữ = {Saved().Phone ?? "null"}");
 
-        Assert.Contains(errors, e => e.Contains("PhoneNumber"));
+        Assert.Contains(errors, e => e.Contains("10 chữ số"));
         Assert.Null(Saved().Phone);
     }
 }

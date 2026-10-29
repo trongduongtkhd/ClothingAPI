@@ -607,6 +607,82 @@ namespace ClothingAPI.Migrations
                     b.ToTable("Payments", (string)null);
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.PaymentAttempt", b =>
+                {
+                    b.Property<int>("PaymentAttemptId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentAttemptId"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("BankCode")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("GatewayTransactionNo")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("LastQueriedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentUrl")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("RequiresReview")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ResponseCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("TransactionStatus")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("TxnRef")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("PaymentAttemptId");
+
+                    b.HasIndex("TxnRef")
+                        .IsUnique();
+
+                    b.HasIndex("PaymentId", "CreatedAt");
+
+                    b.ToTable("PaymentAttempts");
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -1542,6 +1618,17 @@ namespace ClothingAPI.Migrations
                     b.Navigation("Order");
                 });
 
+            modelBuilder.Entity("ClothingAPI.Models.PaymentAttempt", b =>
+                {
+                    b.HasOne("ClothingAPI.Models.Payment", "Payment")
+                        .WithMany("Attempts")
+                        .HasForeignKey("PaymentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Payment");
+                });
+
             modelBuilder.Entity("ClothingAPI.Models.Product", b =>
                 {
                     b.HasOne("ClothingAPI.Models.Brand", "Brand")
@@ -1808,6 +1895,11 @@ namespace ClothingAPI.Migrations
             modelBuilder.Entity("ClothingAPI.Models.OrderItem", b =>
                 {
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("ClothingAPI.Models.Payment", b =>
+                {
+                    b.Navigation("Attempts");
                 });
 
             modelBuilder.Entity("ClothingAPI.Models.Product", b =>

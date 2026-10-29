@@ -5,8 +5,7 @@ using Xunit.Abstractions;
 
 namespace ClothingAPI.UnitTests;
 
-/// CartService.AddItemAsync / UpdateItemAsync. Giới hạn số lượng 1–100 được cài bằng [Range] trên
-/// AddCartItemDto / UpdateCartItemDto nên được kiểm tra bằng validation DTO trước khi gọi service (giống [ApiController]).
+/// CartService.AddItemAsync / UpdateItemAsync: validate DTO và giới hạn sau cộng dồn tại service.
 public class CartTests : UnitTestBase
 {
     public CartTests(ITestOutputHelper output) : base(output) { }
@@ -47,6 +46,28 @@ public class CartTests : UnitTestBase
         Actual(dtoErrors.Count > 0
             ? $"validation DTO trả lỗi \"{string.Join("; ", dtoErrors)}\" (service không được gọi); {CartState()}"
             : $"{Describe(error)}; {CartState()}");
+
+    [Theory]
+    [InlineData(99, 1, true)]
+    [InlineData(99, 2, false)]
+    [InlineData(100, 1, false)]
+    [InlineData(int.MaxValue, 2, false)]
+    public async Task AddItem_ValidatesAccumulatedQuantity_WithoutOverflow(int existing, int added, bool accepted)
+    {
+        var (variantId, _) = Db.AddVariant(stock: int.MaxValue);
+        Db.AddCartItem(Db.CustomerId, variantId, existing);
+        var (dtoErrors, error) = await AddAsync(variantId, added);
+        Assert.Empty(dtoErrors);
+        if (accepted)
+            Assert.Null(error);
+        else
+        {
+            Assert.IsType<BadRequestException>(error);
+            Assert.Equal("Số lượng phải từ 1 đến 100.", error!.Message);
+        }
+        Assert.Equal(accepted ? existing + added : existing,
+            Db.Query(db => db.CartItems.Single(c => c.VariantId == variantId).Quantity));
+    }
 
     [Fact]
     public async Task UT055_ThemGio_HopLe_TaoDongMoi()

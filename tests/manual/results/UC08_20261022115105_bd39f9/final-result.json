@@ -1,0 +1,2519 @@
+{
+  "startedAt": "2026-10-22T11:51:05.165Z",
+  "database": "UC08_20261022115105_bd39f9",
+  "apiContainer": "uc08-api-20261022115105_bd39f9",
+  "webContainer": "uc08-web-20261022115105_bd39f9",
+  "method": "Real production Angular bundles in isolated headless Edge + real API/SQL Server. Authentication and stock/legacy data are test fixtures. Network failures are scoped browser request aborts. No production records modified.",
+  "cases": [
+    {
+      "id": "FUNC 058.1",
+      "title": "Xóa đúng 1/3 dòng",
+      "startedAt": "2026-10-22T11:51:14.963Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/2",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-1.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 3,
+            "variantId": 3,
+            "productId": 3,
+            "productName": "UC08-20261022115105_bd39f9-1-Z",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 1,
+            "variantId": 1,
+            "productId": 1,
+            "productName": "UC08-20261022115105_bd39f9-1-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 100000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 400000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:17.505Z"
+    },
+    {
+      "id": "FUNC 058.2",
+      "title": "Giữ dòng không khả dụng sau xóa dòng khác",
+      "startedAt": "2026-10-22T11:51:17.506Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/4",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/5",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/6",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/7",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-2.png",
+      "persistedCart": {
+        "items": [],
+        "subtotal": 0,
+        "totalQuantity": 0,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:20.130Z"
+    },
+    {
+      "id": "FUNC 058.3",
+      "title": "Xóa dòng cuối",
+      "startedAt": "2026-10-22T11:51:20.131Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/8",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-3.png",
+      "persistedCart": {
+        "items": [],
+        "subtotal": 0,
+        "totalQuantity": 0,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:21.624Z"
+    },
+    {
+      "id": "FUNC 058.4",
+      "title": "Lỗi mạng DELETE giữ giỏ",
+      "startedAt": "2026-10-22T11:51:21.626Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/9",
+          "failed": "net::ERR_FAILED"
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/9",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-4.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 10,
+            "variantId": 11,
+            "productId": 11,
+            "productName": "UC08-20261022115105_bd39f9-4-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 150000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:22.916Z"
+    },
+    {
+      "id": "FUNC 058.5",
+      "title": "Hủy xóa toàn bộ",
+      "startedAt": "2026-10-22T11:51:22.917Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-5.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 13,
+            "variantId": 15,
+            "productId": 15,
+            "productName": "UC08-20261022115105_bd39f9-5-Z",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 450000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 12,
+            "variantId": 14,
+            "productId": 14,
+            "productName": "UC08-20261022115105_bd39f9-5-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 11,
+            "variantId": 13,
+            "productId": 13,
+            "productName": "UC08-20261022115105_bd39f9-5-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 100000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 850000,
+        "totalQuantity": 6,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:24.232Z"
+    },
+    {
+      "id": "FUNC 058.6",
+      "title": "Phân quyền sửa/xóa giỏ",
+      "startedAt": "2026-10-22T11:51:24.233Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-6.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 14,
+            "variantId": 16,
+            "productId": 16,
+            "productName": "UC08-20261022115105_bd39f9-6-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:25.324Z"
+    },
+    {
+      "id": "FUNC 058.7",
+      "title": "Giảm tồn về 2",
+      "startedAt": "2026-10-22T11:51:25.325Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/16",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-7.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 16,
+            "variantId": 19,
+            "productId": 19,
+            "productName": "UC08-20261022115105_bd39f9-7-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 2,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:26.817Z"
+    },
+    {
+      "id": "FUNC 058.8",
+      "title": "Giảm tồn về 1",
+      "startedAt": "2026-10-22T11:51:26.818Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/17",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-8.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 17,
+            "variantId": 22,
+            "productId": 22,
+            "productName": "UC08-20261022115105_bd39f9-8-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 1,
+            "quantity": 1,
+            "totalPrice": 100000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 100000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:28.200Z"
+    },
+    {
+      "id": "FUNC 058.9",
+      "title": "Tồn kho bằng 0",
+      "startedAt": "2026-10-22T11:51:28.201Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/18",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-9.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 19,
+            "variantId": 26,
+            "productId": 26,
+            "productName": "UC08-20261022115105_bd39f9-9-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 150000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:29.286Z"
+    },
+    {
+      "id": "FUNC 058.10",
+      "title": "Tồn thay đổi sau khi tải giỏ",
+      "startedAt": "2026-10-22T11:51:29.287Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/20",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/20",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-10.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 20,
+            "variantId": 28,
+            "productId": 28,
+            "productName": "UC08-20261022115105_bd39f9-10-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 2,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:30.557Z"
+    },
+    {
+      "id": "FUNC 058.11",
+      "title": "Ngừng bán sản phẩm cha",
+      "startedAt": "2026-10-22T11:51:30.558Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/22",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-11.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 21,
+            "variantId": 31,
+            "productId": 31,
+            "productName": "UC08-20261022115105_bd39f9-11-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": false,
+            "isForSale": false
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:31.861Z"
+    },
+    {
+      "id": "FUNC 058.12",
+      "title": "Có hàng trở lại",
+      "startedAt": "2026-10-22T11:51:31.862Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/23",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/23",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-12.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 23,
+            "variantId": 35,
+            "productId": 34,
+            "productName": "UC08-20261022115105_bd39f9-12-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 10,
+            "quantity": 5,
+            "totalPrice": 500000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 500000,
+        "totalQuantity": 5,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:33.217Z"
+    },
+    {
+      "id": "FUNC 058.13",
+      "title": "Giới hạn cộng dồn 99 + 2",
+      "startedAt": "2026-10-22T11:51:33.218Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-13.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 24,
+            "variantId": 38,
+            "productId": 37,
+            "productName": "UC08-20261022115105_bd39f9-13-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 99,
+            "totalPrice": 9900000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 9900000,
+        "totalQuantity": 99,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:34.736Z"
+    },
+    {
+      "id": "FUNC 058.14",
+      "title": "Giới hạn cộng dồn 99 + 1",
+      "startedAt": "2026-10-22T11:51:34.737Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-14.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 25,
+            "variantId": 41,
+            "productId": 40,
+            "productName": "UC08-20261022115105_bd39f9-14-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 10000000,
+        "totalQuantity": 100,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:35.997Z"
+    },
+    {
+      "id": "FUNC 058.15",
+      "title": "Giới hạn cộng dồn 100 + 1",
+      "startedAt": "2026-10-22T11:51:35.998Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-15.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 26,
+            "variantId": 44,
+            "productId": 43,
+            "productName": "UC08-20261022115105_bd39f9-15-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 10000000,
+        "totalQuantity": 100,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:37.343Z"
+    },
+    {
+      "id": "FUNC 058.16",
+      "title": "Cộng dồn nhiều yêu cầu nhỏ",
+      "startedAt": "2026-10-22T11:51:37.344Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 400
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-16.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 27,
+            "variantId": 47,
+            "productId": 46,
+            "productName": "UC08-20261022115105_bd39f9-16-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 99,
+            "totalPrice": 9900000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 9900000,
+        "totalQuantity": 99,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:39.242Z"
+    },
+    {
+      "id": "FUNC 058.17",
+      "title": "Giới hạn riêng từng biến thể",
+      "startedAt": "2026-10-22T11:51:39.243Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-17.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 29,
+            "variantId": 51,
+            "productId": 50,
+            "productName": "UC08-20261022115105_bd39f9-17-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 15000000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 28,
+            "variantId": 50,
+            "productId": 49,
+            "productName": "UC08-20261022115105_bd39f9-17-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 25000000,
+        "totalQuantity": 200,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:40.085Z"
+    },
+    {
+      "id": "FUNC 058.18",
+      "title": "Nút tăng dừng ở 100",
+      "startedAt": "2026-10-22T11:51:40.085Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/30",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/30",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-18.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 30,
+            "variantId": 53,
+            "productId": 52,
+            "productName": "UC08-20261022115105_bd39f9-18-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 10000000,
+        "totalQuantity": 100,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:41.094Z"
+    },
+    {
+      "id": "FUNC 058.19",
+      "title": "Dữ liệu cũ số lượng 150",
+      "startedAt": "2026-10-22T11:51:41.095Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/31",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-19.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 31,
+            "variantId": 56,
+            "productId": 55,
+            "productName": "UC08-20261022115105_bd39f9-19-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 10000000,
+        "totalQuantity": 100,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:42.287Z"
+    },
+    {
+      "id": "FUNC 058.20",
+      "title": "Hai tab cùng thêm tại 99",
+      "startedAt": "2026-10-22T11:51:42.288Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-20.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 32,
+            "variantId": 59,
+            "productId": 58,
+            "productName": "UC08-20261022115105_bd39f9-20-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 100,
+            "totalPrice": 10000000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 10000000,
+        "totalQuantity": 100,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:47.085Z"
+    },
+    {
+      "id": "FUNC 058.21",
+      "title": "API số lượng nguyên không hợp lệ",
+      "startedAt": "2026-10-22T11:51:47.086Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "apiChecks": [
+        {
+          "method": "POST",
+          "quantity": 0,
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "quantity": 0,
+          "status": 400
+        },
+        {
+          "method": "POST",
+          "quantity": -1,
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "quantity": -1,
+          "status": 400
+        },
+        {
+          "method": "POST",
+          "quantity": 101,
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "quantity": 101,
+          "status": 400
+        },
+        {
+          "method": "POST",
+          "quantity": 2147483647,
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "quantity": 2147483647,
+          "status": 400
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-21.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 33,
+            "variantId": 62,
+            "productId": 61,
+            "productName": "UC08-20261022115105_bd39f9-21-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:48.073Z"
+    },
+    {
+      "id": "FUNC 058.22",
+      "title": "API số lượng sai kiểu",
+      "startedAt": "2026-10-22T11:51:48.074Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "apiChecks": [
+        {
+          "method": "POST",
+          "value": "1.5",
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "value": "1.5",
+          "status": 400
+        },
+        {
+          "method": "POST",
+          "value": "\"abc\"",
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "value": "\"abc\"",
+          "status": 400
+        },
+        {
+          "method": "POST",
+          "value": "999999999999999999999",
+          "status": 400
+        },
+        {
+          "method": "PUT",
+          "value": "999999999999999999999",
+          "status": 400
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-22.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 34,
+            "variantId": 65,
+            "productId": 64,
+            "productName": "UC08-20261022115105_bd39f9-22-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:49.000Z"
+    },
+    {
+      "id": "FUNC 058.23",
+      "title": "API biến thể không hợp lệ/không tồn tại",
+      "startedAt": "2026-10-22T11:51:49.001Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-23.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 35,
+            "variantId": 68,
+            "productId": 67,
+            "productName": "UC08-20261022115105_bd39f9-23-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:49.869Z"
+    },
+    {
+      "id": "FUNC 058.24",
+      "title": "Cùng sản phẩm khác biến thể độc lập",
+      "startedAt": "2026-10-22T11:51:49.869Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/36",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/36",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-24.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 37,
+            "variantId": 74,
+            "productId": 70,
+            "productName": "UC08-20261022115105_bd39f9-24-X",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 100000,
+            "stockQuantity": 20,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 300000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:51.106Z"
+    },
+    {
+      "id": "FUNC 058.25",
+      "title": "Thành tiền và số trên giỏ sau tăng giảm",
+      "startedAt": "2026-10-22T11:51:51.107Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/38",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/39",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-25.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 39,
+            "variantId": 76,
+            "productId": 74,
+            "productName": "UC08-20261022115105_bd39f9-25-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 38,
+            "variantId": 75,
+            "productId": 73,
+            "productName": "UC08-20261022115105_bd39f9-25-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 600000,
+        "totalQuantity": 5,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:52.213Z"
+    },
+    {
+      "id": "FUNC 058.26",
+      "title": "Giá hiện hành khi tải lại giỏ",
+      "startedAt": "2026-10-22T11:51:52.214Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/40",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-26.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 40,
+            "variantId": 78,
+            "productId": 76,
+            "productName": "UC08-20261022115105_bd39f9-26-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 120000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 360000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 360000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:55.153Z"
+    },
+    {
+      "id": "FUNC 058.27",
+      "title": "Giỏ lưu sau điều hướng/F5/tab mới",
+      "startedAt": "2026-10-22T11:51:55.154Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/41",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/42",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-27.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 41,
+            "variantId": 81,
+            "productId": 79,
+            "productName": "UC08-20261022115105_bd39f9-27-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 300000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:51:59.338Z"
+    },
+    {
+      "id": "FUNC 058.28",
+      "title": "Đăng xuất/đăng nhập tài khoản khác",
+      "startedAt": "2026-10-22T11:51:59.339Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "fixtureNote": "Đăng xuất bằng nút giao diện thật; đăng nhập bằng API + cookie refresh thật trong cùng browser context. Không kiểm thử CAPTCHA/biểu mẫu đăng nhập.",
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-28.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 43,
+            "variantId": 84,
+            "productId": 82,
+            "productName": "UC08-20261022115105_bd39f9-28-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:02.849Z"
+    },
+    {
+      "id": "FUNC 058.29",
+      "title": "Không phiên và token hết hạn",
+      "startedAt": "2026-10-22T11:52:02.850Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-29.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 45,
+            "variantId": 87,
+            "productId": 85,
+            "productName": "UC08-20261022115105_bd39f9-29-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 200000,
+        "totalQuantity": 2,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:03.776Z"
+    },
+    {
+      "id": "FUNC 058.30",
+      "title": "Lỗi GET giỏ và phục hồi",
+      "startedAt": "2026-10-22T11:52:03.777Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "failed": "net::ERR_FAILED"
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "failed": "net::ERR_FAILED"
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-30.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 47,
+            "variantId": 91,
+            "productId": 89,
+            "productName": "UC08-20261022115105_bd39f9-30-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 46,
+            "variantId": 90,
+            "productId": 88,
+            "productName": "UC08-20261022115105_bd39f9-30-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 200000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 350000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:04.930Z"
+    },
+    {
+      "id": "FUNC 058.31",
+      "title": "PUT lỗi mạng giữ giỏ và thử lại",
+      "startedAt": "2026-10-22T11:52:04.932Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/48",
+          "failed": "net::ERR_FAILED"
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/48",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-31.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 48,
+            "variantId": 93,
+            "productId": 91,
+            "productName": "UC08-20261022115105_bd39f9-31-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 10,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 300000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:06.270Z"
+    },
+    {
+      "id": "FUNC 058.32",
+      "title": "Bấm tăng liên tiếp khi PUT Pending",
+      "startedAt": "2026-10-22T11:52:06.271Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/49",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-32.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 49,
+            "variantId": 96,
+            "productId": 94,
+            "productName": "UC08-20261022115105_bd39f9-32-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 300000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:07.415Z"
+    },
+    {
+      "id": "FUNC 058.33",
+      "title": "Bấm xóa lặp khi DELETE Pending",
+      "startedAt": "2026-10-22T11:52:07.417Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/51",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-33.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 52,
+            "variantId": 101,
+            "productId": 99,
+            "productName": "UC08-20261022115105_bd39f9-33-Z",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 2,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 50,
+            "variantId": 99,
+            "productId": 97,
+            "productName": "UC08-20261022115105_bd39f9-33-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 100000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 400000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:08.587Z"
+    },
+    {
+      "id": "FUNC 058.34",
+      "title": "Dòng đã xóa ở tab khác không bị tạo lại",
+      "startedAt": "2026-10-22T11:52:08.588Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/53",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-34.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 54,
+            "variantId": 103,
+            "productId": 101,
+            "productName": "UC08-20261022115105_bd39f9-34-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 150000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:12.048Z"
+    },
+    {
+      "id": "FUNC 058.35",
+      "title": "Xóa toàn bộ lặp trên giỏ rỗng",
+      "startedAt": "2026-10-22T11:55:07.361Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-35.png",
+      "persistedCart": {
+        "items": [],
+        "subtotal": 0,
+        "totalQuantity": 0,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:55:09.447Z"
+    },
+    {
+      "id": "FUNC 058.36",
+      "title": "Giỏ không thay đổi tồn kho",
+      "startedAt": "2026-10-22T11:52:12.889Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/55",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/55",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-36.png",
+      "persistedCart": {
+        "items": [],
+        "subtotal": 0,
+        "totalQuantity": 0,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:14.807Z"
+    },
+    {
+      "id": "FUNC 058.37",
+      "title": "Nút tăng dừng tại tồn kho thấp hơn 100",
+      "startedAt": "2026-10-22T11:52:14.809Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/56",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/56",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/56",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-37.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 56,
+            "variantId": 111,
+            "productId": 109,
+            "productName": "UC08-20261022115105_bd39f9-37-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 3,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 300000,
+        "totalQuantity": 3,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:15.986Z"
+    },
+    {
+      "id": "FUNC 058.38",
+      "title": "Chuyển sang thanh toán giữ giỏ mới nhất",
+      "startedAt": "2026-10-22T11:52:15.987Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/57",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-38.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 58,
+            "variantId": 115,
+            "productId": 113,
+            "productName": "UC08-20261022115105_bd39f9-38-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          },
+          {
+            "cartItemId": 57,
+            "variantId": 114,
+            "productId": 112,
+            "productName": "UC08-20261022115105_bd39f9-38-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 3,
+            "totalPrice": 300000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 450000,
+        "totalQuantity": 4,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:17.278Z"
+    },
+    {
+      "id": "FUNC 058.39",
+      "title": "Ảnh lỗi và ảnh thay thế",
+      "startedAt": "2026-10-22T11:55:09.448Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/2",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/2",
+          "status": 200
+        }
+      ],
+      "imageEvidence": {
+        "src": "assets/images/product-placeholder.png",
+        "complete": false,
+        "naturalWidth": 0,
+        "responseStatus": 200,
+        "contentType": "text/html"
+      },
+      "otherControlsPassed": true,
+      "status": "Failed",
+      "actual": "DEF-UC08-039: Ảnh thay thế không tải được (naturalWidth=0); /assets/images/product-placeholder.png trả 200 text/html. Tăng số lượng và xóa đúng dòng vẫn hoạt động.",
+      "screenshot": "FUNC-058-39.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 3,
+            "variantId": 5,
+            "productId": 5,
+            "productName": "UC08-20261022115459_04532e-39-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 150000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:55:13.917Z"
+    },
+    {
+      "id": "FUNC 058.40",
+      "title": "Giỏ rỗng và quay lại mua hàng",
+      "startedAt": "2026-10-22T11:52:27.475Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "POST",
+          "path": "/api/cart/items",
+          "status": 201
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-40.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 61,
+            "variantId": 120,
+            "productId": 118,
+            "productName": "UC08-20261022115105_bd39f9-40-X",
+            "thumbnailUrl": null,
+            "colorName": "Đen",
+            "sizeName": "M",
+            "unitPrice": 100000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 100000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 100000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:52:28.890Z"
+    }
+  ],
+  "apiImage": "sha256:0cc9af11ccf11518217ce27d79194551f1c5ab7571be79205232124ac3167070",
+  "frontendImage": "sha256:3375ae24ff8aecd99a620e77f0f0b3845fb73fbd765d011d94ced140bf045b55",
+  "cleanup": {
+    "uc08-web-20261022115105_bd39f9": "removed",
+    "uc08-api-20261022115105_bd39f9": "removed",
+    "databaseRemoved": true
+  },
+  "completedAt": "2026-10-22T11:55:15.775Z",
+  "summary": {
+    "passed": 39,
+    "failed": 1,
+    "total": 40
+  },
+  "runs": [
+    {
+      "database": "UC08_20261022115105_bd39f9",
+      "cleanup": {
+        "uc08-web-20261022115105_bd39f9": "removed",
+        "uc08-api-20261022115105_bd39f9": "removed",
+        "databaseRemoved": true
+      }
+    },
+    {
+      "database": "UC08_20261022115459_04532e",
+      "cleanup": {
+        "uc08-web-20261022115459_04532e": "removed",
+        "uc08-api-20261022115459_04532e": "removed",
+        "databaseRemoved": true
+      }
+    }
+  ]
+}

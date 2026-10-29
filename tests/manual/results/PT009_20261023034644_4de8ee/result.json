@@ -1,0 +1,486 @@
+{
+  "testcase": "PT009 / P8",
+  "database": "PT009_20261023034644_4de8ee",
+  "container": "pt009-api-20261023034644_4de8ee",
+  "startedAt": "2026-10-23T03:46:44.313Z",
+  "rounds": [
+    {
+      "round": 1,
+      "variantId": 1,
+      "before": {
+        "VariantId": 1,
+        "StockQuantity": 1
+      },
+      "requestStartGapMs": 0.5712000001221895,
+      "responses": [
+        {
+          "customer": "pt009.customer1@test.local",
+          "sentAtMs": 7322.604499999899,
+          "durationMs": 320.92909999983385,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 1,
+              "orderCode": "DH20261023104651596687",
+              "receiverName": "PT009 Customer 1",
+              "receiverPhone": "0900000001",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 1",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:51.6026035Z",
+              "items": [
+                {
+                  "orderItemId": 1,
+                  "variantId": 1,
+                  "productName": "Áo Polo PT009 round 1",
+                  "sku": "PT009-ROUND-1",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 1,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:51.6031989Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 1,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ nhất",
+                  "createdAt": "2026-10-23T03:46:51.6033841Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        },
+        {
+          "customer": "pt009.customer2@test.local",
+          "sentAtMs": 7323.175700000022,
+          "durationMs": 319.79369999980554,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 2,
+              "orderCode": "DH20261023104651596630",
+              "receiverName": "PT009 Customer 2",
+              "receiverPhone": "0900000002",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 1",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:51.6026488Z",
+              "items": [
+                {
+                  "orderItemId": 2,
+                  "variantId": 1,
+                  "productName": "Áo Polo PT009 round 1",
+                  "sku": "PT009-ROUND-1",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 2,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:51.6032004Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 2,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ hai",
+                  "createdAt": "2026-10-23T03:46:51.6034099Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        }
+      ],
+      "verification": {
+        "stock": 0,
+        "orderCount": 2,
+        "soldQuantity": 2,
+        "orders": [
+          {
+            "OrderId": 1,
+            "OrderCode": "DH20261023104651596687",
+            "UserId": 1,
+            "Note": "PT009 round 1",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 2,
+            "OrderCode": "DH20261023104651596630",
+            "UserId": 2,
+            "Note": "PT009 round 1",
+            "Quantity": 1
+          }
+        ]
+      },
+      "passed": false
+    },
+    {
+      "round": 2,
+      "variantId": 2,
+      "before": {
+        "VariantId": 2,
+        "StockQuantity": 1
+      },
+      "requestStartGapMs": 0.3425000002607703,
+      "responses": [
+        {
+          "customer": "pt009.customer1@test.local",
+          "sentAtMs": 8005.257499999832,
+          "durationMs": 28.266700000036508,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 3,
+              "orderCode": "DH20261023104652228860",
+              "receiverName": "PT009 Customer 1",
+              "receiverPhone": "0900000001",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 2",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:52.2296751Z",
+              "items": [
+                {
+                  "orderItemId": 3,
+                  "variantId": 2,
+                  "productName": "Áo Polo PT009 round 2",
+                  "sku": "PT009-ROUND-2",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 3,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:52.2296788Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 3,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ nhất",
+                  "createdAt": "2026-10-23T03:46:52.2296797Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        },
+        {
+          "customer": "pt009.customer2@test.local",
+          "sentAtMs": 8005.600000000093,
+          "durationMs": 31.886799999978393,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 4,
+              "orderCode": "DH20261023104652229556",
+              "receiverName": "PT009 Customer 2",
+              "receiverPhone": "0900000002",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 2",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:52.2297663Z",
+              "items": [
+                {
+                  "orderItemId": 4,
+                  "variantId": 2,
+                  "productName": "Áo Polo PT009 round 2",
+                  "sku": "PT009-ROUND-2",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 4,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:52.2297699Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 4,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ hai",
+                  "createdAt": "2026-10-23T03:46:52.2297703Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        }
+      ],
+      "verification": {
+        "stock": 0,
+        "orderCount": 2,
+        "soldQuantity": 2,
+        "orders": [
+          {
+            "OrderId": 3,
+            "OrderCode": "DH20261023104652228860",
+            "UserId": 1,
+            "Note": "PT009 round 2",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 4,
+            "OrderCode": "DH20261023104652229556",
+            "UserId": 2,
+            "Note": "PT009 round 2",
+            "Quantity": 1
+          }
+        ]
+      },
+      "passed": false
+    },
+    {
+      "round": 3,
+      "variantId": 3,
+      "before": {
+        "VariantId": 3,
+        "StockQuantity": 1
+      },
+      "requestStartGapMs": 0.30670000007376075,
+      "responses": [
+        {
+          "customer": "pt009.customer1@test.local",
+          "sentAtMs": 8457.414799999911,
+          "durationMs": 26.414900000207126,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 6,
+              "orderCode": "DH20261023104652673617",
+              "receiverName": "PT009 Customer 1",
+              "receiverPhone": "0900000001",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 3",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:52.6743774Z",
+              "items": [
+                {
+                  "orderItemId": 6,
+                  "variantId": 3,
+                  "productName": "Áo Polo PT009 round 3",
+                  "sku": "PT009-ROUND-3",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 6,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:52.6743809Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 6,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ nhất",
+                  "createdAt": "2026-10-23T03:46:52.6743814Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        },
+        {
+          "customer": "pt009.customer2@test.local",
+          "sentAtMs": 8457.721499999985,
+          "durationMs": 20.583199999760836,
+          "status": 201,
+          "body": {
+            "success": true,
+            "message": "Đặt hàng thành công.",
+            "data": {
+              "orderId": 5,
+              "orderCode": "DH20261023104652672328",
+              "receiverName": "PT009 Customer 2",
+              "receiverPhone": "0900000002",
+              "shippingAddress": "PT009 isolated test, Phuong 1, Quan 1, TP. Ho Chi Minh",
+              "note": "PT009 round 3",
+              "subtotal": 200000,
+              "shippingFee": 30000,
+              "discountAmount": 0,
+              "totalAmount": 230000,
+              "couponCode": null,
+              "orderStatus": "Pending",
+              "paymentStatus": "Unpaid",
+              "createdAt": "2026-10-23T03:46:52.6738259Z",
+              "items": [
+                {
+                  "orderItemId": 5,
+                  "variantId": 3,
+                  "productName": "Áo Polo PT009 round 3",
+                  "sku": "PT009-ROUND-3",
+                  "colorName": "Be",
+                  "sizeName": "M",
+                  "unitPrice": 200000,
+                  "quantity": 1,
+                  "totalPrice": 200000
+                }
+              ],
+              "payments": [
+                {
+                  "paymentId": 5,
+                  "paymentMethod": "COD",
+                  "amount": 230000,
+                  "paymentStatus": "Unpaid",
+                  "transactionCode": null,
+                  "paidAt": null,
+                  "createdAt": "2026-10-23T03:46:52.6738331Z"
+                }
+              ],
+              "statusHistories": [
+                {
+                  "orderStatusHistoryId": 5,
+                  "status": "Pending",
+                  "note": "Khách hàng đã tạo đơn hàng.",
+                  "changedByName": "Khách thứ hai",
+                  "createdAt": "2026-10-23T03:46:52.6738337Z"
+                }
+              ],
+              "returnRequest": null,
+              "canRequestReturn": false,
+              "returnDeadline": null
+            }
+          }
+        }
+      ],
+      "verification": {
+        "stock": 0,
+        "orderCount": 2,
+        "soldQuantity": 2,
+        "orders": [
+          {
+            "OrderId": 5,
+            "OrderCode": "DH20261023104652672328",
+            "UserId": 2,
+            "Note": "PT009 round 3",
+            "Quantity": 1
+          },
+          {
+            "OrderId": 6,
+            "OrderCode": "DH20261023104652673617",
+            "UserId": 1,
+            "Note": "PT009 round 3",
+            "Quantity": 1
+          }
+        ]
+      },
+      "passed": false
+    }
+  ],
+  "image": "sha256:ffc031fb233c603b96678d9089249b2e18603efc02efe6f0b20ec5728c9304dd",
+  "mainApiImage": "sha256:d70ac6e92ca111a77f1f7280be39d317b7fd9de66f6acb362ee75bb3264501b8",
+  "network": "clothing-store_default",
+  "method": "Two independent customer sessions; simultaneous HTTP POST requests; persisted SQL Server verification; three rounds with distinct stock=1 variants.",
+  "passed": false,
+  "testContainerRemoved": true,
+  "completedAt": "2026-10-23T03:46:53.284Z"
+}

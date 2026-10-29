@@ -13,4 +13,5 @@ public class Payment
     public DateTime? PaidAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Order Order { get; set; } = null!;
+    public ICollection<PaymentAttempt> Attempts { get; set; } = new List<PaymentAttempt>();
 }

@@ -105,7 +105,7 @@ public class IntegrationTests : IClassFixture<CustomWebApplicationFactory>
         var client = _factory.CreateClient();
         var email = UniqueEmail("it005");
 
-        var register = await RegisterAsync(client, email, DefaultPassword, "Khách IT005");
+        var register = await RegisterAsync(client, email, DefaultPassword, "Khách kiểm thử");
         Log($"POST /api/auth/register ({email}) -> {(int)register.StatusCode} {register.StatusCode}");
         Assert.Equal(HttpStatusCode.Created, register.StatusCode);
 

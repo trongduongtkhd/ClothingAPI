@@ -43,7 +43,7 @@ namespace ClothingAPI.Services.Implementations
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto registerDto)
         {
-            var email = registerDto.Email.Trim().ToLower();
+            var email = UserInputRules.NormalizeEmail(registerDto.Email);
 
             var emailExists = await _context.Users.AnyAsync(x => x.Email == email);
 
@@ -75,14 +75,27 @@ namespace ClothingAPI.Services.Implementations
             });
 
             _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // The unique Email index is the final guard when requests race past AnyAsync.
+                // EF has rolled back its implicit transaction; translate only an actual duplicate.
+                if (await _context.Users.AsNoTracking().AnyAsync(x => x.Email == email))
+                {
+                    throw new BadRequestException("Email này đã được sử dụng.");
+                }
+                throw;
+            }
 
             return CreateAuthResponse(user, ["Customer"]);
         }
 
         public async Task<LoginResult> LoginAsync(LoginDto loginDto, string? ip = null)
         {
-            var email = loginDto.Email.Trim().ToLower();
+            var email = loginDto.Email.Trim().ToLowerInvariant();
 
             var user = await _context.Users
                 .Include(x => x.UserRoles)
@@ -184,7 +197,7 @@ namespace ClothingAPI.Services.Implementations
 
         public async Task ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
         {
-            var email = forgotPasswordDto.Email.Trim().ToLower();
+            var email = forgotPasswordDto.Email.Trim().ToLowerInvariant();
 
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
 

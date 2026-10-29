@@ -11,6 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Serilog;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 namespace ClothingAPI
 {
     public class Program
@@ -68,6 +70,18 @@ namespace ClothingAPI
 
             builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
             builder.Services.Configure<FrontendSettings>(builder.Configuration.GetSection("FrontendSettings"));
+            builder.Services.AddOptions<VnpaySettings>()
+                .Bind(builder.Configuration.GetSection("VnpaySettings"))
+                .Validate(x => !x.Enabled || (x.IsConfigured && x.PaymentMinutes is >= 1 and <= 60
+                    && x.OrderMinutes >= x.PaymentMinutes
+                    && x.PaymentUrl == "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+                    && x.TransactionApiUrl == "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction"),
+                    "Cấu hình VNPAY Sandbox không hợp lệ hoặc thiếu thông tin kết nối.")
+                .ValidateOnStart();
+            builder.Services.AddSingleton(TimeProvider.System);
+            builder.Services.AddHttpClient("vnpay", client => client.Timeout = TimeSpan.FromSeconds(15));
+            builder.Services.AddScoped<IVnpayService, VnpayService>();
+            builder.Services.AddHostedService<VnpayExpiryWorker>();
             builder.Services.Configure<RefreshTokenSettings>(builder.Configuration.GetSection("RefreshTokenSettings"));
 
             builder.Services.Configure<TwoFactorSettings>(builder.Configuration.GetSection("TwoFactorSettings"));
@@ -172,6 +186,32 @@ namespace ClothingAPI
             builder.Services.AddScoped<ISizeService, SizeService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IStorefrontService, StorefrontService>();
+            builder.Services.Configure<ChatbotOptions>(builder.Configuration.GetSection("Chatbot"));
+            builder.Services.AddSingleton<ChatInferenceGate>();
+            builder.Services.AddHttpClient<IChatIntentClient, OllamaChatIntentClient>((services, client) =>
+            {
+                var options = services.GetRequiredService<Microsoft.Extensions.Options.IOptions<ChatbotOptions>>().Value;
+                client.BaseAddress = new Uri(options.OllamaUrl.TrimEnd('/') + "/");
+                client.Timeout = Timeout.InfiniteTimeSpan;
+            });
+            builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+                options.AddPolicy("chat", context => RateLimitPartition.GetSlidingWindowLimiter(
+                    context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    _ => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 30, Window = TimeSpan.FromMinutes(1), SegmentsPerWindow = 6,
+                        QueueLimit = 0, AutoReplenishment = true
+                    }));
+                options.OnRejected = async (context, token) =>
+                {
+                    context.HttpContext.Response.Headers.RetryAfter = "60";
+                    await context.HttpContext.Response.WriteAsJsonAsync(new ApiResponse<object>(false,
+                        "Có quá nhiều câu hỏi trong một phút. Bạn chờ một chút rồi thử lại nhé."), token);
+                };
+            });
             builder.Services.AddScoped<IUserProfileService, UserProfileService>();
             builder.Services.AddScoped<IAddressService, AddressService>();
             builder.Services.AddScoped<ICartService, CartService>();
@@ -247,9 +287,18 @@ namespace ClothingAPI
             {
                 app.UseHttpsRedirection();
             }
-            app.UseStaticFiles();
+            app.UseMiddleware<OptimizedImageMiddleware>();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                OnPrepareResponse = context =>
+                {
+                    if (context.Context.Request.Path.StartsWithSegments("/uploads"))
+                        context.Context.Response.Headers.CacheControl = "public, max-age=604800";
+                }
+            });
             app.UseCors("AngularApp");
             app.UseAuthentication();
+            app.UseRateLimiter();
             app.UseAuthorization();
 
 

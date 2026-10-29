@@ -1,0 +1,7 @@
+# Apply the locally published API and production Angular builds without rebuilding dependencies.
+# docker compose -p clothing-store -f docker-compose.yml -f tests/manual/docker-compose.registration.yml up -d --no-deps --no-build api frontend
+services:
+  api:
+    image: clothing-store-api:registration
+  frontend:
+    image: clothing-store-frontend:registration

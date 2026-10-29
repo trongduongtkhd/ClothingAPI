@@ -1,0 +1,116 @@
+{
+  "startedAt": "2026-10-22T11:54:59.209Z",
+  "database": "UC08_20261022115459_04532e",
+  "apiContainer": "uc08-api-20261022115459_04532e",
+  "webContainer": "uc08-web-20261022115459_04532e",
+  "method": "Real production Angular bundles in isolated headless Edge + real API/SQL Server. Authentication and stock/legacy data are test fixtures. Network failures are scoped browser request aborts. No production records modified.",
+  "cases": [
+    {
+      "id": "FUNC 058.35",
+      "title": "Xóa toàn bộ lặp trên giỏ rỗng",
+      "startedAt": "2026-10-22T11:55:07.361Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        }
+      ],
+      "status": "Passed",
+      "actual": "Các bước và kiểm tra tự động của testcase đều đạt trên giao diện/API thật; dữ liệu lưu trong SQL được đối chiếu.",
+      "screenshot": "FUNC-058-35.png",
+      "persistedCart": {
+        "items": [],
+        "subtotal": 0,
+        "totalQuantity": 0,
+        "shippingFee": 0,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:55:09.447Z"
+    },
+    {
+      "id": "FUNC 058.39",
+      "title": "Ảnh lỗi và ảnh thay thế",
+      "startedAt": "2026-10-22T11:55:09.448Z",
+      "network": [
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "GET",
+          "path": "/api/cart",
+          "status": 200
+        },
+        {
+          "method": "PUT",
+          "path": "/api/cart/items/2",
+          "status": 200
+        },
+        {
+          "method": "DELETE",
+          "path": "/api/cart/items/2",
+          "status": 200
+        }
+      ],
+      "imageEvidence": {
+        "src": "assets/images/product-placeholder.png",
+        "complete": false,
+        "naturalWidth": 0,
+        "responseStatus": 200,
+        "contentType": "text/html"
+      },
+      "otherControlsPassed": true,
+      "status": "Failed",
+      "actual": "DEF-UC08-039: Ảnh thay thế không tải được (naturalWidth=0); /assets/images/product-placeholder.png trả 200 text/html. Tăng số lượng và xóa đúng dòng vẫn hoạt động.",
+      "screenshot": "FUNC-058-39.png",
+      "persistedCart": {
+        "items": [
+          {
+            "cartItemId": 3,
+            "variantId": 5,
+            "productId": 5,
+            "productName": "UC08-20261022115459_04532e-39-Y",
+            "thumbnailUrl": null,
+            "colorName": "Be",
+            "sizeName": "L",
+            "unitPrice": 150000,
+            "stockQuantity": 200,
+            "quantity": 1,
+            "totalPrice": 150000,
+            "isAvailable": true,
+            "isForSale": true
+          }
+        ],
+        "subtotal": 150000,
+        "totalQuantity": 1,
+        "shippingFee": 30000,
+        "freeShippingThreshold": 500000
+      },
+      "completedAt": "2026-10-22T11:55:13.917Z"
+    }
+  ],
+  "selectedCases": [
+    35,
+    39
+  ],
+  "apiImage": "sha256:0cc9af11ccf11518217ce27d79194551f1c5ab7571be79205232124ac3167070",
+  "frontendImage": "sha256:3375ae24ff8aecd99a620e77f0f0b3845fb73fbd765d011d94ced140bf045b55",
+  "cleanup": {
+    "uc08-web-20261022115459_04532e": "removed",
+    "uc08-api-20261022115459_04532e": "removed",
+    "databaseRemoved": true
+  },
+  "completedAt": "2026-10-22T11:55:15.775Z",
+  "summary": {
+    "passed": 1,
+    "failed": 1,
+    "total": 2
+  }
+}

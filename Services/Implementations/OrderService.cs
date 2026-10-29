@@ -7,6 +7,7 @@ using ClothingAPI.Helpers;
 using ClothingAPI.Models;
 using ClothingAPI.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace ClothingAPI.Services.Implementations;
 
@@ -14,15 +15,21 @@ public class OrderService : IOrderService
 {
     private readonly AppDbContext _context;
     private readonly ICouponService _couponService;
+    private readonly VnpaySettings _vnpay;
 
-    public OrderService(AppDbContext context, ICouponService couponService)
+    public OrderService(AppDbContext context, ICouponService couponService, IOptions<VnpaySettings>? vnpay = null)
     {
         _context = context;
         _couponService = couponService;
+        _vnpay = vnpay?.Value ?? new VnpaySettings();
     }
 
     public async Task<OrderDetailDto> CreateAsync(int userId, CreateOrderDto dto)
     {
+        if (!Enum.IsDefined(dto.PaymentMethod))
+            throw new BadRequestException("Phương thức thanh toán không hợp lệ.");
+        if (dto.PaymentMethod == PaymentMethod.VnPay && !_vnpay.IsConfigured)
+            throw new BadRequestException("VNPAY Sandbox chưa được cấu hình.");
         await using var transaction = await _context.Database.BeginTransactionAsync();
 
 
@@ -126,6 +133,7 @@ public class OrderService : IOrderService
         var shippingFee = ShippingHelper.CalculateShippingFee(subtotal);
         var discountAmount = couponValidation?.DiscountAmount ?? 0m;
         var totalAmount = subtotal - discountAmount + shippingFee;
+        if (dto.PaymentMethod == PaymentMethod.VnPay) VnpayProtocol.Amount(totalAmount);
 
         var order = new Order
         {
@@ -266,6 +274,7 @@ public class OrderService : IOrderService
 
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
+        await VnpayOrderLock.AcquireAsync(_context, orderId);
 
 
         var order = await _context.Orders
@@ -294,6 +303,13 @@ public class OrderService : IOrderService
             throw new BadRequestException(
                 "Đơn hàng đã thanh toán không thể hủy trực tiếp."
             );
+        }
+
+        if (order.Payments.Any(x => x.PaymentMethod == PaymentMethod.VnPay))
+        {
+            await VnpayOrderLock.EnsureNoActiveAttemptAsync(_context, orderId);
+            if (await _context.PaymentAttempts.AnyAsync(x => x.Payment.OrderId == orderId && x.RequiresReview))
+                throw new BadRequestException("Giao dịch cần shop đối soát trước khi hủy đơn.");
         }
 
         foreach (var orderItem in order.OrderItems)

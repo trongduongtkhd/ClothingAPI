@@ -1,0 +1,26 @@
+﻿{
+    "CheckedAtUtc":  "2026-10-22T08:28:40.8788283Z",
+    "FrontendProductionBuild":  "main.934cfd460274b694e6ad.js",
+    "Checks":  [
+                   {
+                       "BaseUri":  "http://localhost:8080",
+                       "Status":  400,
+                       "RejectedFields":  [
+                                              "Email",
+                                              "FullName",
+                                              "Password",
+                                              "PhoneNumber"
+                                          ]
+                   },
+                   {
+                       "BaseUri":  "http://localhost:4200",
+                       "Status":  400,
+                       "RejectedFields":  [
+                                              "Email",
+                                              "FullName",
+                                              "Password",
+                                              "PhoneNumber"
+                                          ]
+                   }
+               ]
+}

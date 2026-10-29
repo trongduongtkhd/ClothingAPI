@@ -100,6 +100,7 @@ public class AdminOrderService : IAdminOrderService
 
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
+        await VnpayOrderLock.AcquireAsync(_context, orderId);
 
         var order = await _context.Orders
             .Include(x => x.OrderItems)
@@ -119,6 +120,20 @@ public class AdminOrderService : IAdminOrderService
         }
 
         string? defaultNote = null;
+        var vnpayPayment = order.Payments.FirstOrDefault(x => x.PaymentMethod == PaymentMethod.VnPay);
+        if (vnpayPayment is not null)
+        {
+            if (dto.Status == OrderStatus.Cancelled)
+            {
+                if (order.PaymentStatus is PaymentStatus.Paid or PaymentStatus.Refunded)
+                    throw new BadRequestException("Đơn VNPAY đã thanh toán cần hoàn tiền qua cổng trước khi hủy; chức năng hoàn tiền chưa được bật.");
+                await VnpayOrderLock.EnsureNoActiveAttemptAsync(_context, orderId);
+                if (await _context.PaymentAttempts.AnyAsync(x => x.Payment.OrderId == orderId && x.RequiresReview))
+                    throw new BadRequestException("Giao dịch VNPAY cần đối soát trước khi hủy.");
+            }
+            else if (order.PaymentStatus != PaymentStatus.Paid)
+                throw new BadRequestException("Cần nhận xác nhận thanh toán VNPAY trước khi xử lý giao hàng.");
+        }
 
         // Hoàn thành = đã giao hàng. Với COD, shipper thu tiền mặt lúc giao nên ghi nhận đã thanh toán luôn;
         // với thanh toán online thì phải thanh toán xong mới được hoàn thành.
@@ -233,6 +248,9 @@ public class AdminOrderService : IAdminOrderService
             );
         }
 
+        if (payment.PaymentMethod == PaymentMethod.VnPay)
+            throw new BadRequestException("Thanh toán VNPAY được xác nhận tự động từ cổng, không thể thay đổi thủ công.");
+
         // COD chỉ thu tiền khi giao hàng: hệ thống tự ghi nhận lúc đơn Hoàn thành.
         // Cho phép bấm tay với đơn đã Hoàn thành mà vẫn chưa thanh toán (dữ liệu cũ).
         if (dto.PaymentStatus == PaymentStatus.Paid &&
@@ -273,6 +291,7 @@ public class AdminOrderService : IAdminOrderService
     public async Task<OrderDetailDto> ApproveReturnAsync(int adminUserId, int orderId, ProcessReturnRequestDto dto)
     {
         await using var transaction = await _context.Database.BeginTransactionAsync();
+        await VnpayOrderLock.AcquireAsync(_context, orderId);
 
         var order = await _context.Orders
             .Include(x => x.OrderItems)
@@ -289,6 +308,9 @@ public class AdminOrderService : IAdminOrderService
         }
 
         var payment = order.Payments.FirstOrDefault();
+
+        if (payment?.PaymentMethod == PaymentMethod.VnPay)
+            throw new BadRequestException("Hoàn tiền qua VNPAY chưa được bật. Chưa thể duyệt trả hàng cho giao dịch này.");
 
         if (payment is not null)
         {
